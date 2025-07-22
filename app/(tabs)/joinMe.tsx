@@ -7,7 +7,7 @@ export default function text() {
   return (
     <SafeAreaView>
       <View>
-        <Text style={{ color: "black" }}>dsdewwedwdef</Text>
+        <Text style={{ color: "black" }}>JOINME</Text>
       </View>
     </SafeAreaView>
   );

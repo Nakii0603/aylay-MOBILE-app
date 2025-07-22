@@ -1,107 +1,157 @@
+import Colors from "@/constants/Colors";
 import React from "react";
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 
-const WelcomeScreen = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
+export default function Home() {
+  const router = useRouter();
+  const { width } = Dimensions.get("window");
 
-  const handleBack = () => {
-    navigation.goBack();
-  };
+  const images = [
+    {
+      id: 1,
+      source: require("@/assets/trash/image.png"),
+      name: "Name 1",
+      price: "100t",
+    },
+    {
+      id: 2,
+      source: require("@/assets/trash/image.png"),
+      name: "Name 2",
+      price: "200t",
+    },
+    {
+      id: 3,
+      source: require("@/assets/trash/image.png"),
+      name: "Name 3",
+      price: "300t",
+    },
+    {
+      id: 4,
+      source: require("@/assets/trash/image.png"),
+      name: "Name 4",
+      price: "400t",
+    },
+    {
+      id: 5,
+      source: require("@/assets/trash/image.png"),
+      name: "Name 5",
+      price: "500t",
+    },
+  ];
 
   return (
-    <View style={styles.container}>
-      {/* Logo */}
-      <Image
-        source={require("@/assets/logo/logo.png")}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <View>
+          <Text style={{ color: "black", fontSize: 24, fontWeight: "bold" }}>
+            Home
+          </Text>
+          <Image
+            source={require("@/assets/trash/image.png")}
+            style={{
+              width: "100%",
+              height: 200,
+              borderRadius: 10,
+              marginTop: 10,
+            }}
+          />
+        </View>
 
-      {/* App Name */}
-      <Text style={styles.subtitle}>
-        Аяллаа хялбар төлөвлө. Монголыг илүү гүн мэдэр.
-      </Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ flexDirection: "row", marginTop: 10 }}
+        >
+          {images.map((item, index) => (
+            <TouchableOpacity
+              key={item.id}
+              style={{
+                marginLeft: index === 0 ? 0 : 10,
+                position: "relative",
+                width: width / 3 - 23,
+                height: 150,
+              }}
+              onPress={() =>
+                router.push({
+                  pathname: "/SurveyInfo",
+                  params: { id: item.id.toString(), name: item.name },
+                })
+              }
+            >
+              <Image
+                source={item.source}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: 10,
+                }}
+              />
 
-      {/* Features */}
-      <View style={styles.features}>
-        <View style={styles.featureItem}>
-          <Ionicons name="map-outline" size={28} color="#F4C430" />
-          <Text style={styles.featureText}>AI маршрут гаргагч</Text>
-        </View>
-        <View style={styles.featureItem}>
-          <Ionicons name="cloud-offline-outline" size={28} color="#F4C430" />
-          <Text style={styles.featureText}>Оффлайн горим</Text>
-        </View>
-        <View style={styles.featureItem}>
-          <Ionicons name="home-outline" size={28} color="#F4C430" />
-          <Text style={styles.featureText}>Нутгийн үйлчилгээ</Text>
-        </View>
+              {/* Price Label */}
+              {item.price && (
+                <Text
+                  style={{
+                    position: "absolute",
+                    top: 5,
+                    left: 5,
+                    color: Colors.black,
+                    backgroundColor: Colors.white,
+                    paddingHorizontal: 6,
+                    paddingVertical: 2,
+                    borderRadius: 4,
+                    fontSize: 12,
+                  }}
+                >
+                  {item.price}
+                </Text>
+              )}
+
+              {/* Name Label */}
+              <View
+                style={{
+                  position: "absolute",
+                  bottom: 5,
+                  left: 0,
+                  right: 0,
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    paddingHorizontal: 10,
+                    textAlign: "center",
+                    color: Colors.black,
+                    backgroundColor: Colors.white,
+                    paddingVertical: 2,
+                    fontSize: 12,
+                    borderRadius: 16,
+                  }}
+                >
+                  {item.name}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
-
-      {/* Start Button */}
-      <TouchableOpacity
-        style={styles.button}
-      >
-        <Text style={styles.buttonText}>Эхлэх</Text>
-      </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
-};
-
-export default WelcomeScreen;
+}
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-  },
-  logo: {
-    width: 140,
-    height: 140,
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: "#222",
-    marginBottom: 6,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 30,
-  },
-  features: {
-    marginBottom: 40,
-    width: "100%",
-  },
-  featureItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 14,
-  },
-  featureText: {
-    fontSize: 16,
-    marginLeft: 12,
-    color: "#333",
-  },
-  button: {
-    backgroundColor: "#F4C430",
-    paddingVertical: 14,
-    paddingHorizontal: 60,
-    borderRadius: 16,
-    elevation: 2,
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#000",
+    marginHorizontal: 10,
+    flex: 1,
   },
 });

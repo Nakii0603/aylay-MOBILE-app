@@ -1,0 +1,49 @@
+[
+  {
+    "./app/(tabs)//index.tsx": [
+      "container",
+      "innerContainer",
+      "chatBox",
+      "chatContent",
+      "message",
+      "userMsg",
+      "assistantMsg",
+      "messageText",
+      "inputBox",
+      "input",
+      "sendButton"
+    ],
+    "./app/(tabs)//profile.tsx": [
+      "container",
+      "backContainer",
+      "processBarInfo",
+      "proccessBarContainer",
+      "card",
+      "content",
+      "profileRowContainer",
+      "profileContainer",
+      "infoContainer",
+      "profileImage",
+      "levelText",
+      "memberTypeText",
+      "logoImage",
+      "scoreText",
+      "scoreRowContainer",
+      "info",
+      "imagesContainer",
+      "imageWithText",
+      "infoImage",
+      "historyText",
+      "countsContainer",
+      "countColumn",
+      "countText",
+      "menu",
+      "menuItem",
+      "menuItemContent",
+      "menuItemText",
+      "menuItemLogoutText",
+      "progressText",
+      "progressBar"
+    ]
+  }
+]
