@@ -1,14 +1,6 @@
-import { Text } from "@react-navigation/elements";
+import Chat from "@/components/user/Chat";
 import React from "react";
-import { View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function text() {
-  return (
-    <SafeAreaView>
-      <View>
-        <Text style={{ color: "black" }}>JOINME</Text>
-      </View>
-    </SafeAreaView>
-  );
+  return <Chat />;
 }

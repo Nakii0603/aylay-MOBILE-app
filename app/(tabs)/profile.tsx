@@ -13,32 +13,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-interface ProgressBarProps {
-  levelName: string;
-  progress: number;
-  total: number;
-}
-
-const ProgressBar: React.FC<ProgressBarProps> = ({
-  levelName,
-  progress,
-  total,
-}) => {
-  const progressPercent = (progress / total) * 100;
-
-  return (
-    <View style={styles.proccessBarContainer}>
-      <View style={styles.processBarInfo}>
-        <Text style={styles.levelText}>{levelName}</Text>
-        <Text style={styles.progressText}>{`${progress}/${total}`}</Text>
-      </View>
-      <View style={styles.progressBar}>
-        <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
-      </View>
-    </View>
-  );
-};
-
 export default function ProfileScreen() {
   const [token, setToken] = useState<string>("");
   const [userError, setUserError] = useState<string | null>(null);
@@ -56,6 +30,10 @@ export default function ProfileScreen() {
       </TouchableOpacity>
       <View style={styles.card}>
         <View style={styles.content}>
+          <Image
+            source={require("@/assets/icons/logoBack.png")}
+            style={styles.backgroundImage}
+          />
           <View style={styles.profileRowContainer}>
             <View style={styles.profileContainer}>
               <Image
@@ -70,17 +48,10 @@ export default function ProfileScreen() {
             <View style={styles.infoContainer}>
               <Text style={styles.memberTypeText}>user Name</Text>
               <View style={styles.scoreRowContainer}>
-                <Text style={styles.scoreText}>sdfsdf</Text>
-                <Image
-                  source={require("@/assets/icons/profScore.png")}
-                  style={styles.logoImage}
-                />
+                <Text style={styles.scoreText}>Aylay</Text>
               </View>
             </View>
           </View>
-        </View>
-        <View>
-          <Text style={styles.scoreText}>sdfsdf</Text>
         </View>
       </View>
       <View style={styles.menu}>
@@ -146,15 +117,6 @@ const styles = StyleSheet.create({
   backContainer: {
     marginLeft: 10,
   },
-  processBarInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    bottom: 5,
-  },
-  proccessBarContainer: {
-    paddingHorizontal: 10,
-  },
   card: {
     backgroundColor: Colors.primaryColor,
     borderRadius: 10,
@@ -166,11 +128,14 @@ const styles = StyleSheet.create({
   content: {
     paddingVertical: 10,
     paddingHorizontal: 10,
+    paddingLeft: 30,
+    position: "relative",
   },
   profileRowContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    zIndex: 2,
   },
   profileContainer: {
     flexDirection: "column",
@@ -186,25 +151,12 @@ const styles = StyleSheet.create({
     height: 68,
     borderRadius: 34,
   },
-  levelText: {
-    color: Colors.white,
-    fontSize: 13,
-    fontWeight: "600",
-    fontFamily: "Inter",
-    marginTop: 5,
-  },
   memberTypeText: {
     color: Colors.white,
     fontSize: 13,
     fontWeight: "600",
     fontFamily: "Inter",
     marginBottom: 5,
-  },
-  logoImage: {
-    width: 30,
-    height: 30,
-    marginLeft: 5,
-    marginBottom: 10,
   },
   scoreText: {
     color: Colors.white,
@@ -237,7 +189,7 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 16,
-    color: Colors.primaryColor,
+    color: Colors.black,
     fontWeight: "600",
   },
   menuItemLogoutText: {
@@ -245,22 +197,18 @@ const styles = StyleSheet.create({
     color: Colors.red,
     fontWeight: "600",
   },
-  progressText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontFamily: "Inter",
-    marginBottom: 5,
-  },
-  progressBar: {
-    height: 10,
-    width: "100%",
-    backgroundColor: "#e0e0e0",
-    borderRadius: 5,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: "100%",
-    backgroundColor: "#3b5998",
-    borderRadius: 5,
+  backgroundImage: {
+    position: "absolute",
+    width: 600, 
+    height: 600,
+    opacity: 0.05,
+    resizeMode: "contain",
+    zIndex: 1,
+    top: "50%",
+    left: "50%",
+    transform: [
+      { translateX: -200 },
+      { translateY: -200 },
+    ],
   },
 });

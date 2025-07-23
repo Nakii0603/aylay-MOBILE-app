@@ -16,7 +16,7 @@ export default function AimagDetail() {
       {/* Header-г бүрэн нуух */}
       <Stack.Screen options={{ headerShown: false }} />
 
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView  style={{ flex: 1 ,backgroundColor: "#fff"}}>
         <ScrollView contentContainerStyle={styles.container}>
           <Text style={styles.title}>{name || aimag?.name || "Аймаг"}</Text>
           <Text style={styles.text}>Аймгийн код: {id}</Text>
@@ -53,6 +53,7 @@ export default function AimagDetail() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 24,
