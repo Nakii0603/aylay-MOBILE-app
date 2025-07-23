@@ -10,4 +10,6 @@ export default {
   prizeLabelColor: "#6A6A6A",
   tabBarBackground: "#F9F9F9",
   darkGreen: "#013632",
+  primary: "#2196f3",
+  darkGray: "#555",
 };

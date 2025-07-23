@@ -1,42 +1,89 @@
 import React from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import {
+  View,
+  Text,
+  Image,
+  Button,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import Colors from "@/constants/Colors";
 
 export default function SurveyInfo() {
   const router = useRouter();
+  const { id, name } = useLocalSearchParams();
 
-  // Cast to any to bypass TS error on searchParams
-  const searchParams = (router as any).searchParams || {};
-  const { id, name } = searchParams;
+  // Dummy data for survey info
+  const survey = {
+    id,
+    name,
+    description:
+      "Help us improve our service by answering a few quick questions.",
+    questionCount: 10,
+    image: require("@/assets/trash/image.png"), // You can update per id if needed
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Survey Info</Text>
-      <Text style={styles.text}>ID: {id ?? "N/A"}</Text>
-      <Text style={styles.text}>Name: {name ?? "N/A"}</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>{survey.name}</Text>
 
-      <Button
-        title="Go to Survey Form"
-        onPress={() => router.push("/SurveyForm")}
-      />
-    </View>
+      <Image source={survey.image} style={styles.image} />
+
+      <Text style={styles.description}>{survey.description}</Text>
+
+      <Text style={styles.count}>{survey.questionCount} Questions</Text>
+
+      <View style={styles.buttonWrapper}>
+        <Button
+          title="Start Survey"
+          color={Colors.primary}
+          onPress={() =>
+            router.push({
+              pathname: "/SurveyForm",
+              params: { surveyId: id?.toString() ?? "" },
+            })
+          }
+        />
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: "center",
+    padding: 24,
+    backgroundColor: Colors.white,
     alignItems: "center",
-    padding: 20,
-    backgroundColor: "#fff",
+    flexGrow: 1,
   },
   title: {
-    fontSize: 28,
-    marginBottom: 20,
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 12,
+    textAlign: "center",
+    color: Colors.black,
   },
-  text: {
-    fontSize: 18,
+  image: {
+    width: "100%",
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 16,
+    resizeMode: "cover",
+  },
+  description: {
+    fontSize: 16,
+    textAlign: "center",
     marginBottom: 10,
+    color: Colors.darkGray,
+  },
+  count: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 20,
+    color: Colors.black,
+  },
+  buttonWrapper: {
+    width: "100%",
   },
 });
