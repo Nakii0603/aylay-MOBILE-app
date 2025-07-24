@@ -60,7 +60,7 @@ export default function ProfileScreen() {
             <View style={styles.menuItemContent}>
               <Image
                 source={require("@/assets/icons/profInformationMenu.png")}
-                style={{ width: 26, height: 26 }}
+                style={{ width: 30, height: 30 }}
               />
               <Text style={styles.menuItemText}>Миний мэдээлэл</Text>
             </View>
@@ -70,7 +70,7 @@ export default function ProfileScreen() {
             <View style={styles.menuItemContent}>
               <Image
                 source={require("@/assets/icons/profPinCodeMenu.png")}
-                style={{ width: 26, height: 26 }}
+                style={{ width: 30, height: 30 }}
               />
               <Text style={styles.menuItemText}>Пин код өөрчлөх</Text>
             </View>
@@ -80,7 +80,7 @@ export default function ProfileScreen() {
             <View style={styles.menuItemContent}>
               <Image
                 source={require("@/assets/icons/profQuestionMenu.png")}
-                style={{ width: 26, height: 26 }}
+                style={{ width: 30, height: 30 }}
               />
               <Text style={styles.menuItemText}>Асуулт, хариулт</Text>
             </View>
@@ -90,7 +90,7 @@ export default function ProfileScreen() {
             <View style={styles.menuItemContent}>
               <Image
                 source={require("@/assets/icons/profTermMenu.png")}
-                style={{ width: 26, height: 26 }}
+                style={{ width: 30, height: 30 }}
               />
               <Text style={styles.menuItemText}>Үйлчилгээний нөхцөл</Text>
             </View>
@@ -100,7 +100,7 @@ export default function ProfileScreen() {
             <View style={styles.menuItemContent}>
               <Image
                 source={require("@/assets/icons/profTermMenu.png")}
-                style={{ width: 26, height: 26 }}
+                style={{ width: 30, height: 30 }}
               />
               <Text style={styles.menuItemText}>Даатгал</Text>
             </View>

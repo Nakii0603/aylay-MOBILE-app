@@ -1,14 +1,11 @@
-import { Text } from "@react-navigation/elements";
 import React from "react";
 import { View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import StepperSurvey from "@/components/user/TravelInterestForm";
 
-export default function travel() {
+export default function TabTwoScreen() {
   return (
-    <SafeAreaView>
-      <View>
-        <Text style={{ color: "black" }}>travel</Text>
-      </View>
-    </SafeAreaView>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+      <StepperSurvey />
+    </View>
   );
 }

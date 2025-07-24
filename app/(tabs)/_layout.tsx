@@ -1,42 +1,57 @@
-import React from "react";
-import { Tabs } from "expo-router";
-import { Platform } from "react-native";
 import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import TabBarBackground from "@/components/ui/TabBarBackground";
+import { Tabs } from "expo-router";
+import React from "react";
+import { Image, Platform } from "react-native";
 
 export default function TabLayout() {
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
-          },
-          default: {},
-        }),
+        tabBarStyle: {
+          backgroundColor: "#FFFFFF",
+          borderTopWidth: 0,
+          elevation: 0,
+          position: Platform.OS === "ios" ? "absolute" : "relative",
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+          title: "Нүүр",
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={
+                focused
+                  ? require("@/assets/icons/homeBlue.png")
+                  : require("@/assets/icons/home.png")
+              }
+              style={{
+                width: 28,
+                height: 28,
+              }}
+            />
           ),
         }}
       />
       <Tabs.Screen
         name="joinMe"
         options={{
-          title: "joinMe",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+          title: "Хайх",
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={
+                focused
+                  ? require("@/assets/icons/starBlue.png")
+                  : require("@/assets/icons/star.png")
+              }
+              style={{
+                width: 28,
+                height: 28,
+              }}
+            />
           ),
         }}
       />
@@ -44,8 +59,18 @@ export default function TabLayout() {
         name="travel"
         options={{
           title: "Аялъя",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={
+                focused
+                  ? require("@/assets/icons/sendBlue.png")
+                  : require("@/assets/icons/send.png")
+              }
+              style={{
+                width: 28,
+                height: 28,
+              }}
+            />
           ),
         }}
       />
@@ -53,8 +78,18 @@ export default function TabLayout() {
         name="explore"
         options={{
           title: "Хайх",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={
+                focused
+                  ? require("@/assets/icons/mapBlue.png")
+                  : require("@/assets/icons/map.png")
+              }
+              style={{
+                width: 28,
+                height: 30,
+              }}
+            />
           ),
         }}
       />
@@ -62,8 +97,18 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Профайл",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={
+                focused
+                  ? require("@/assets/icons/userBlue.png")
+                  : require("@/assets/icons/user.png")
+              }
+              style={{
+                width: 28,
+                height: 28,
+              }}
+            />
           ),
         }}
       />
