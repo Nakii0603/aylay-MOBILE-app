@@ -19,9 +19,9 @@ export default function SurveyInfo() {
     id,
     name,
     description:
-      "Help us improve our service by answering a few quick questions.",
+      "Та өөрийгөө байгалийн хатуу ширүүн нөхцөлд хэрхэн авч явах вэ гэдгийг мэдэхийг хүсч байна уу? Энэхүү сонирхолтой асуулга нь таны амьд үлдэх ур чадвар, бодит нөхцөлд хэрхэн зөв шийдвэр гаргах чадварыг шалгана.",
     questionCount: 10,
-    image: require("@/assets/trash/image.png"), // You can update per id if needed
+    image: require("@/assets/trash/image.png"), 
   };
 
   return (
@@ -32,11 +32,11 @@ export default function SurveyInfo() {
 
       <Text style={styles.description}>{survey.description}</Text>
 
-      <Text style={styles.count}>{survey.questionCount} Questions</Text>
+      <Text style={styles.count}>{survey.questionCount} асуулт</Text>
 
       <View style={styles.buttonWrapper}>
         <Button
-          title="Start Survey"
+          title="Судалгаа эхлүүлэх"
           color={Colors.primary}
           onPress={() =>
             router.push({
@@ -73,7 +73,6 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
-    textAlign: "center",
     marginBottom: 10,
     color: Colors.darkGray,
   },

@@ -17,31 +17,38 @@ export default function Home() {
   const router = useRouter();
   const { width } = Dimensions.get("window");
 
-  // Жишээ зураг, та өөр зураг ашиглаарай
   const images = [
     {
       id: 1,
-      source: require("@/assets/trash/image.png"),
-      name: "Name 1",
-      price: "100t",
+      source: {
+        uri: "https://img.freepik.com/free-vector/hand-drawn-travel-stuff-collection_23-2147641008.jpg",
+      },
+      name: "Аялагч хүний сорил",
+      price: "үнэгүй",
     },
     {
       id: 2,
-      source: require("@/assets/trash/image.png"),
-      name: "Name 2",
-      price: "200t",
+      source: {
+        uri: "https://media.istockphoto.com/id/1398598910/vector/local-man-help-tourists-finding-right-way.jpg?s=612x612&w=0&k=20&c=kw_kmPi0wr3tke2abrAde620EVk6XwR7rjw9MgHtHEE=",
+      },
+      name: "Аялагч хүний сорил",
+      price: "үнэгүй",
     },
     {
       id: 3,
-      source: require("@/assets/trash/image.png"),
-      name: "Name 3",
-      price: "300t",
+      source: {
+        uri: "https://img.freepik.com/free-vector/tourist-man-looking-navigation-confusing-choose-way-with-road-sign-cartoon-illustration-traveller-backpacker_1150-39714.jpg",
+      },
+      name: "Аялагч хүний сорил",
+      price: "үнэгүй",
     },
     {
       id: 4,
-      source: require("@/assets/trash/image.png"),
-      name: "Name 3",
-      price: "300t",
+      source: {
+        uri: "https://img.freepik.com/free-vector/gradient-world-tourism-day-illustration_52683-129641.jpg?semt=ais_hybrid&w=740",
+      },
+      name: "Аялагч хүний сорил",
+      price: "үнэгүй",
     },
   ];
 
@@ -49,7 +56,7 @@ export default function Home() {
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.white }}>
       <View style={styles.container}>
         <Image
-          source={require("@/assets/trash/image.png")}
+          source={require("@/assets/images/cover.png")}
           style={styles.mainImage}
         />
         <View>
@@ -110,10 +117,7 @@ export default function Home() {
               }
               activeOpacity={0.8}
             >
-              <Image
-                source={item.source}
-                style={styles.logo}
-              />
+              <Image source={item.source} style={styles.logo} />
               <View style={styles.textContainer}>
                 <Text style={styles.title}>{item.name}</Text>
                 <Text style={styles.subtitle}>{item.area}</Text>

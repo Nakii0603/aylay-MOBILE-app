@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import {
-  View,
+  Alert,
+  ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Alert,
+  View,
 } from "react-native";
 
 const questions = [
@@ -125,6 +125,12 @@ export default function SurveyForm() {
     setAnswers(newAnswers);
   }
 
+  function calculateMaxScore() {
+    return allQuestions.reduce((sum, question) => {
+      const maxOptionScore = Math.max(...question.options.map((o) => o.score));
+      return sum + maxOptionScore;
+    }, 0);
+  }
   function handleNext() {
     if (answers[currentIndex] === null) {
       alert("Та сонголтоо хийнэ үү");
@@ -139,10 +145,13 @@ export default function SurveyForm() {
         const optionScore = currentQuestion.options[answerIndex].score;
         return sum + optionScore;
       }, 0);
+      calculateMaxScore();
 
-      Alert.alert("Төгсгөл", `Таны нийт оноо: ${calculateTotalScore()}`, [
-        { text: "OK" },
-      ]);
+      Alert.alert(
+        "Төгсгөл",
+        `Таны нийт оноо: ${calculateMaxScore()} / ${calculateTotalScore()}`,
+        [{ text: "OK" }]
+      );
     }
   }
 
