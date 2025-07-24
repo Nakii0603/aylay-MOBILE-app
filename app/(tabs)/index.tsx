@@ -111,7 +111,7 @@ export default function Home() {
               activeOpacity={0.8}
             >
               <Image
-                source={require("@/assets/trash/image.png")}
+                source={item.source}
                 style={styles.logo}
               />
               <View style={styles.textContainer}>
@@ -198,7 +198,6 @@ const styles = StyleSheet.create({
   logo: {
     width: 40,
     height: 40,
-    borderRadius: 20,
     resizeMode: "contain",
     marginRight: 10,
   },

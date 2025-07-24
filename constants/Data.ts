@@ -12,6 +12,7 @@ export interface Aimag {
   name: string;
   area: string;
   naturalSites: NaturalSite[];
+  source?: any;
 }
 
 export const aimags: Aimag[] = [
@@ -19,6 +20,7 @@ export const aimags: Aimag[] = [
     id: 1,
     name: "Архангай",
     area: "55,313 км²",
+    source: require("@/assets/regions/arhagai.png"),
     naturalSites: [
       {
         name: "Тэрхийн Цагаан нуур",
@@ -81,6 +83,7 @@ export const aimags: Aimag[] = [
     id: 2,
     name: "Баян-Өлгий",
     area: "45,704 км²",
+    source: require("@/assets/regions/baynulgii.png"),
     naturalSites: [
       // өмнөх 3
       {
@@ -123,6 +126,7 @@ export const aimags: Aimag[] = [
     id: 3,
     name: "Баянхонгор",
     area: "116,000 км²",
+    source: require("@/assets/regions/baynhongor.png"),
     naturalSites: [
       // өмнөх 2
       {
@@ -166,6 +170,7 @@ export const aimags: Aimag[] = [
     id: 4,
     name: "Булган",
     area: "48,700 км²",
+    source: require("@/assets/regions/bulgan.png"),
     naturalSites: [
       // өмнөх 2
       {
@@ -212,6 +217,7 @@ export const aimags: Aimag[] = [
     id: 5,
     name: "Говь-Алтай",
     area: "141,500 км²",
+    source: require("@/assets/regions/gobialtai.png"),
     naturalSites: [
       // өмнөх 2
       {
@@ -266,6 +272,7 @@ export const aimags: Aimag[] = [
     id: 6,
     name: "Говьсүмбэр",
     area: "5,541 км²",
+    source: require("@/assets/regions/govisumber.png"),
     naturalSites: [
       {
         name: "ЧОЙРЫН БОГД УУЛ",
@@ -302,6 +309,7 @@ export const aimags: Aimag[] = [
     id: 7,
     name: "Дархан-Уул",
     area: "3,275 км²",
+    source: require("@/assets/regions/darhan.png"),
     naturalSites: [
       // өмнөх 1
       {
@@ -338,6 +346,7 @@ export const aimags: Aimag[] = [
     id: 8,
     name: "Дорноговь",
     area: "109,472 км²",
+    source: require("@/assets/regions/dornogobi.png"),
     naturalSites: [
       // өмнөх 2
       {
@@ -375,6 +384,7 @@ export const aimags: Aimag[] = [
     id: 9,
     name: "Дорнод",
     area: "123,597 км²",
+    source: require("@/assets/regions/dornod.png"),
     naturalSites: [
       // өмнөх 2
       {
@@ -412,6 +422,7 @@ export const aimags: Aimag[] = [
     id: 10,
     name: "Дундговь",
     area: "74,000 км²",
+    source: require("@/assets/regions/dundgobi.png"),
     naturalSites: [
       // өмнөх 2
       {
@@ -448,6 +459,7 @@ export const aimags: Aimag[] = [
     id: 11,
     name: "Завхан",
     area: "82,455 км²",
+    source: require("@/assets/regions/zawhan.png"),
     naturalSites: [
       // өмнөх 2
       {
@@ -496,6 +508,7 @@ export const aimags: Aimag[] = [
     id: 12,
     name: "Орхон",
     area: "844 км²",
+    source: require("@/assets/regions/orhon.png"),
     naturalSites: [
       {
         name: "Айргийн гозгорын Хүннүгийн бүлэг дурсгалт",
@@ -515,6 +528,7 @@ export const aimags: Aimag[] = [
     id: 13,
     name: "Өвөрхангай",
     area: "62,895 км²",
+    source: require("@/assets/regions/uwurhangai.png"),
     naturalSites: [
       // өмнөх 2
       {
@@ -558,6 +572,7 @@ export const aimags: Aimag[] = [
     id: 14,
     name: "Өмнөговь",
     area: "165,380 км²",
+    source: require("@/assets/regions/umnugobi.png"),
     naturalSites: [
       // өмнөх 2
       {
@@ -624,6 +639,7 @@ export const aimags: Aimag[] = [
     id: 15,
     name: "Ховд",
     area: "76,060 км²",
+    source: require("@/assets/regions/howd.png"),
     naturalSites: [
       // өмнөх 2
       {
@@ -678,6 +694,7 @@ export const aimags: Aimag[] = [
     id: 16,
     name: "Увс",
     area: "69,585 км²",
+    source: require("@/assets/regions/uvs.png"),
     naturalSites: [
       // өмнөх 2
       {
@@ -729,6 +746,7 @@ export const aimags: Aimag[] = [
     id: 17,
     name: "Хөвсгөл",
     area: "100,628 км²",
+    source: require("@/assets/regions/huwsgul.png"),
     naturalSites: [
       // өмнөх 2
       {
@@ -767,6 +785,8 @@ export const aimags: Aimag[] = [
     id: 18,
     name: "Сэлэнгэ",
     area: "41,152 км²",
+    source: require("@/assets/regions/selenge.png"),
+
     naturalSites: [
       // өмнөх 2
       {
@@ -814,6 +834,7 @@ export const aimags: Aimag[] = [
     id: 19,
     name: "Сүхбаатар",
     area: "82,300 км²",
+    source: require("@/assets/regions/suhbaatar.png"),
     naturalSites: [
       // өмнөх 2
       {
@@ -857,6 +878,7 @@ export const aimags: Aimag[] = [
     id: 20,
     name: "Хэнтий",
     area: "80,325 км²",
+    source: require("@/assets/regions/hentii.png"),
     naturalSites: [
       // өмнөх 2
       {
@@ -913,6 +935,7 @@ export const aimags: Aimag[] = [
     id: 21,
     name: "Төв",
     area: "74,042 км²",
+    source: require("@/assets/regions/tuw.png"),
     naturalSites: [
       // өмнөх 2
       {
