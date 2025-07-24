@@ -1,8 +1,15 @@
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, StyleSheet, Text, View, Button } from "react-native";
-import React from "react";
 import { aimags } from "@/constants/Data";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import React from "react";
+import {
+  Button,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AimagDetail() {
   const router = useRouter();
@@ -13,13 +20,15 @@ export default function AimagDetail() {
 
   return (
     <>
-      {/* Header-г бүрэн нуух */}
       <Stack.Screen options={{ headerShown: false }} />
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+        <View style={styles.backButtonContainer}>
+          <Button title="← Буцах" onPress={() => router.back()} />
+        </View>
 
-      <SafeAreaView  style={{ flex: 1 ,backgroundColor: "#fff"}}>
         <ScrollView contentContainerStyle={styles.container}>
           <Text style={styles.title}>{name || aimag?.name || "Аймаг"}</Text>
-          <Text style={styles.text}>Аймгийн код: {id}</Text>
+          {/* <Text style={styles.text}>Аймгийн код: {id}</Text> */}
           <Text style={styles.text}>
             Газар нутгийн хэмжээ: {area || aimag?.area || "Мэдээлэл алга"}
           </Text>
@@ -30,7 +39,18 @@ export default function AimagDetail() {
 
           {aimag && aimag.naturalSites && aimag.naturalSites.length > 0 ? (
             aimag.naturalSites.map((place, index) => (
-              <View key={index} style={{ marginTop: 10 }}>
+              <View key={index} style={styles.placeContainer}>
+                {place.image ? (
+                  <Image
+                    source={{ uri: place.image }}
+                    style={styles.placeImage}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.placeholderImage}>
+                    <Text style={{ color: "#999" }}>No Image</Text>
+                  </View>
+                )}
                 <Text style={styles.placeName}>• {place.name}</Text>
                 <Text style={styles.placeDesc}>{place.description}</Text>
               </View>
@@ -40,10 +60,6 @@ export default function AimagDetail() {
               Мэдээлэл алга.
             </Text>
           )}
-
-          <View style={{ marginTop: 20 }}>
-            <Button title="Буцах" onPress={() => router.back()} />
-          </View>
         </ScrollView>
       </SafeAreaView>
     </>
@@ -51,6 +67,12 @@ export default function AimagDetail() {
 }
 
 const styles = StyleSheet.create({
+  backButtonContainer: {
+    position: "absolute",
+    top: 40,
+    left: 10,
+    zIndex: 10,
+  },
   container: {
     padding: 20,
     backgroundColor: "#fff",
@@ -62,6 +84,24 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     marginTop: 10,
+  },
+  placeContainer: {
+    marginTop: 20,
+  },
+  placeImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  placeholderImage: {
+    width: "100%",
+    height: 200,
+    backgroundColor: "#eee",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
   },
   placeName: {
     fontSize: 16,

@@ -18,7 +18,7 @@ export default function ProfileScreen() {
   const [userError, setUserError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [profileImage, setProfileImage] = useState<string>("");
-
+  
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar
@@ -93,6 +93,16 @@ export default function ProfileScreen() {
                 style={{ width: 26, height: 26 }}
               />
               <Text style={styles.menuItemText}>Үйлчилгээний нөхцөл</Text>
+            </View>
+            <AntDesign name="right" size={20} color={Colors.primaryColor} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.menuItemContent}>
+              <Image
+                source={require("@/assets/icons/profTermMenu.png")}
+                style={{ width: 26, height: 26 }}
+              />
+              <Text style={styles.menuItemText}>Даатгал</Text>
             </View>
             <AntDesign name="right" size={20} color={Colors.primaryColor} />
           </TouchableOpacity>
@@ -199,16 +209,13 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     position: "absolute",
-    width: 600, 
+    width: 600,
     height: 600,
     opacity: 0.05,
     resizeMode: "contain",
     zIndex: 1,
     top: "50%",
     left: "50%",
-    transform: [
-      { translateX: -200 },
-      { translateY: -200 },
-    ],
+    transform: [{ translateX: -200 }, { translateY: -200 }],
   },
 });
