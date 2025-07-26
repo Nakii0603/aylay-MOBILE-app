@@ -1,5 +1,5 @@
 import Colors from "@/constants/Colors";
-import { aimags } from "@/constants/Data";
+import { aimags, allSurveys } from "@/constants/Data";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -20,33 +20,25 @@ export default function Home() {
   const images = [
     {
       id: 1,
-      source: {
-        uri: "https://img.freepik.com/free-vector/hand-drawn-travel-stuff-collection_23-2147641008.jpg",
-      },
+      source: require("@/assets/images/Artboard1.jpg"),
       name: "Аялагч хүний сорил",
       price: "үнэгүй",
     },
     {
       id: 2,
-      source: {
-        uri: "https://media.istockphoto.com/id/1398598910/vector/local-man-help-tourists-finding-right-way.jpg?s=612x612&w=0&k=20&c=kw_kmPi0wr3tke2abrAde620EVk6XwR7rjw9MgHtHEE=",
-      },
+      source: require("@/assets/images/Artboard2.jpg"),
       name: "Аялагч хүний сорил",
       price: "үнэгүй",
     },
     {
       id: 3,
-      source: {
-        uri: "https://img.freepik.com/free-vector/tourist-man-looking-navigation-confusing-choose-way-with-road-sign-cartoon-illustration-traveller-backpacker_1150-39714.jpg",
-      },
+      source: require("@/assets/images/Artboard3.jpg"),
       name: "Аялагч хүний сорил",
       price: "үнэгүй",
     },
     {
       id: 4,
-      source: {
-        uri: "https://img.freepik.com/free-vector/gradient-world-tourism-day-illustration_52683-129641.jpg?semt=ais_hybrid&w=740",
-      },
+      source: require("@/assets/images/Artboard4.jpg"),
       name: "Аялагч хүний сорил",
       price: "үнэгүй",
     },

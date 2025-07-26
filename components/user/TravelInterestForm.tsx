@@ -228,7 +228,7 @@ const TravelInterestForm: React.FC = () => {
               <ActivityIndicator size="large" color="#00B894" />
             ) : (
               <>
-                <Text style={styles.modalTitle}>GPT санал</Text>
+                <Text style={styles.modalTitle}>Таны аяллын маршрут</Text>
                 <ScrollView>
                   <Text style={styles.modalText}>{chatResponse}</Text>
                 </ScrollView>
