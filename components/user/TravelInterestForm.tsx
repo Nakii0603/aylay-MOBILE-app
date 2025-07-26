@@ -1,15 +1,16 @@
+import Colors from "@/constants/Colors";
+import { SERVER_URI } from "@/utils/uri";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
+  Modal,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Modal,
-  ActivityIndicator,
 } from "react-native";
-import { SERVER_URI } from "@/utils/uri";
 
 interface QuestionType {
   id: number;
@@ -194,26 +195,26 @@ const TravelInterestForm: React.FC = () => {
             <Text style={styles.buttonText}>Өмнөх</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={next}
-            disabled={currentQuestion === questions.length - 1}
-            style={[
-              styles.navButton,
-              currentQuestion === questions.length - 1 && styles.disabledButton,
-            ]}
-          >
-            <Text style={styles.buttonText}>Дараах</Text>
-          </TouchableOpacity>
+          {Object.keys(answers).length === questions.length ? (
+            <TouchableOpacity onPress={handleSubmit} style={styles.navButton}>
+              <Text style={styles.buttonText}>Илгээх</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={next}
+              disabled={currentQuestion === questions.length - 1}
+              style={[
+                styles.navButton,
+                currentQuestion === questions.length - 1 &&
+                  styles.disabledButton,
+              ]}
+            >
+              <Text style={styles.buttonText}>Дараах</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
-        {currentQuestion === questions.length - 1 && (
-          <TouchableOpacity
-            onPress={handleSubmit}
-            style={[styles.navButton, { marginTop: 20 }]}
-          >
-            <Text style={styles.buttonText}>Илгээх</Text>
-          </TouchableOpacity>
-        )}
+      
       </ScrollView>
 
       <Modal
@@ -253,6 +254,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: "#fff",
+    marginTop:50
   },
   stepText: {
     fontSize: 16,
@@ -275,7 +277,7 @@ const styles = StyleSheet.create({
   },
   selectedOption: {
     backgroundColor: "#E8F5E9",
-    borderColor: "#00B894",
+    borderColor: Colors.primaryColor,
   },
   buttonRow: {
     flexDirection: "row",
@@ -284,7 +286,7 @@ const styles = StyleSheet.create({
   },
   navButton: {
     padding: 12,
-    backgroundColor: "#00B894",
+    backgroundColor: Colors.primaryColor,
     borderRadius: 8,
     minWidth: 100,
     alignItems: "center",
@@ -312,7 +314,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   activeStep: {
-    backgroundColor: "#00B894",
+    backgroundColor: Colors.primaryColor,
   },
   modalBackground: {
     flex: 1,
@@ -338,7 +340,7 @@ const styles = StyleSheet.create({
   closeButton: {
     marginTop: 20,
     padding: 12,
-    backgroundColor: "#00B894",
+    backgroundColor: Colors.primaryColor,
     borderRadius: 10,
     alignItems: "center",
   },

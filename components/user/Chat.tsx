@@ -1,3 +1,4 @@
+import Colors from "@/constants/Colors";
 import { SERVER_URI } from "@/utils/uri";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -167,7 +168,7 @@ const styles = StyleSheet.create({
     borderColor: "#D1D5DB",
   },
   sendButton: {
-    backgroundColor: "#3B82F6",
+    backgroundColor: Colors.primaryColor,
     paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: 20,
