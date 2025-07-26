@@ -13,18 +13,34 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const images = [
+  { image: require("../../assets/images/caroseal1.jpg") },
+  { image: require("../../assets/images/caroseal2.jpg") },
+  { image: require("../../assets/images/caroseal3.jpg") },
+];
+
 export default function Home() {
   const router = useRouter();
   const { width } = Dimensions.get("window");
 
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.white }}>
       <View style={styles.container}>
-        <Image
-          source={require("@/assets/images/cover.png")}
-          style={styles.mainImage}
-        />
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          style={{ marginTop: 10 }}
+        >
+          {images.map((img, index) => (
+            <Image
+              key={index}
+              source={img.image}
+              style={[styles.mainImage, { width: width - 20 }]}
+            />
+          ))}
+        </ScrollView>
+
         <View>
           <ScrollView
             horizontal
@@ -100,10 +116,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   mainImage: {
-    width: "100%",
-    height: 200,
+    height: 300,
     borderRadius: 10,
-    marginTop: 10,
   },
   scrollContainer: {
     flexDirection: "row",
