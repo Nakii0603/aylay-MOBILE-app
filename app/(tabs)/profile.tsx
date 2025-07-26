@@ -46,7 +46,7 @@ export default function ProfileScreen() {
               />
             </View>
             <View style={styles.infoContainer}>
-              <Text style={styles.memberTypeText}>user Name</Text>
+              <Text style={styles.memberTypeText}>User Name</Text>
               <View style={styles.scoreRowContainer}>
                 <Text style={styles.scoreText}>Aylay</Text>
               </View>

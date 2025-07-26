@@ -154,6 +154,8 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 10,
     overflow: "hidden",
+    borderColor: Colors.primaryColor,
+    borderWidth: 1,
   },
   itemImage: {
     width: "100%",

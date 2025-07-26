@@ -1,5 +1,5 @@
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { Ionicons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import {
   DarkTheme,
   DefaultTheme,
@@ -40,29 +40,30 @@ export default function RootLayout() {
           <Stack.Screen
             name="SurveyInfo"
             options={{
-              title: "Survey Info",
+              headerTitle: "",
+              headerShadowVisible: false,
               headerLeft: () => (
                 <TouchableOpacity
                   onPress={() => router.back()}
                   style={{ paddingHorizontal: 15 }}
                 >
-                  <Ionicons name="arrow-back" size={24} color="black" />
+                  <AntDesign name="arrowleft" size={24} color="black" />
                 </TouchableOpacity>
               ),
             }}
           />
 
-          {/* Custom back button for SurveyForm */}
           <Stack.Screen
             name="SurveyForm"
             options={{
-              title: "Survey Form",
+              headerTitle: "",
+              headerShadowVisible: false,
               headerLeft: () => (
                 <TouchableOpacity
                   onPress={() => router.back()}
                   style={{ paddingHorizontal: 15 }}
                 >
-                  <Ionicons name="arrow-back-circle" size={24} color="black" />
+                  <AntDesign name="arrowleft" size={24} color="black" />
                 </TouchableOpacity>
               ),
             }}

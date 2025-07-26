@@ -1,3 +1,4 @@
+import Colors from "@/constants/Colors";
 import React, { useState } from "react";
 import {
   Alert,
@@ -149,7 +150,7 @@ export default function SurveyForm() {
 
       Alert.alert(
         "Төгсгөл",
-        `Таны нийт оноо: ${calculateMaxScore()} / ${calculateTotalScore()}`,
+        `Таны нийт оноо:  ${calculateTotalScore()}/${calculateMaxScore()}`,
         [{ text: "OK" }]
       );
     }
@@ -175,7 +176,7 @@ export default function SurveyForm() {
       </Text>
       <Text style={styles.questionText}>{currentQuestion.question}</Text>
 
-      <ScrollView style={{ marginVertical: 20 }}>
+      <ScrollView style={{ marginVertical: 20, maxHeight: 250 }}>
         {currentQuestion.options.map((option, idx) => {
           const selected = answers[currentIndex] === idx;
           return (
@@ -202,7 +203,7 @@ export default function SurveyForm() {
           <>
             <View style={{ flex: 1, alignItems: "flex-start" }}>
               <TouchableOpacity onPress={handleBack} style={styles.navButton}>
-                <Text style={styles.navButtonText}>Back</Text>
+                <Text style={styles.navButtonText}>Өмнөх</Text>
               </TouchableOpacity>
             </View>
             <View style={{ flex: 1, alignItems: "flex-end" }}>
@@ -215,7 +216,9 @@ export default function SurveyForm() {
                 disabled={answers[currentIndex] === null}
               >
                 <Text style={styles.navButtonText}>
-                  {currentIndex === allQuestions.length - 1 ? "Submit" : "Next"}
+                  {currentIndex === allQuestions.length - 1
+                    ? "Submit"
+                    : "Дараах"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -231,7 +234,7 @@ export default function SurveyForm() {
               disabled={answers[currentIndex] === null}
             >
               <Text style={styles.navButtonText}>
-                {currentIndex === allQuestions.length - 1 ? "Submit" : "Next"}
+                {currentIndex === allQuestions.length - 1 ? "Submit" : "Дараах"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -272,8 +275,8 @@ const styles = StyleSheet.create({
     marginVertical: 6,
   },
   selectedOption: {
-    backgroundColor: "#4caf50",
-    borderColor: "#4caf50",
+    backgroundColor: Colors.primaryColor,
+    borderColor: Colors.primaryColor,
   },
   optionText: {
     fontSize: 16,
@@ -288,10 +291,11 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   navButton: {
-    backgroundColor: "#2196f3",
+    backgroundColor: Colors.primaryColor,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
+    
   },
   navButtonText: {
     color: "white",
