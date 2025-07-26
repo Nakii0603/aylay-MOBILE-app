@@ -1,3 +1,4 @@
+import { ImageSourcePropType } from "react-native";
 export interface NaturalSite {
   name: string;
   description: string;
@@ -11,7 +12,7 @@ export interface Aimag {
   id: number;
   name: string;
   area: string;
-  source: string;
+  source: ImageSourcePropType;
   sum: number;
   population: number;
   features: string;

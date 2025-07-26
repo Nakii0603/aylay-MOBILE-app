@@ -14,9 +14,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const images = [
-  { image: require("../../assets/images/caroseal1.jpg") },
-  { image: require("../../assets/images/caroseal2.jpg") },
-  { image: require("../../assets/images/caroseal3.jpg") },
+  { image: require("../../assets/images/caroseal1.png") },
+  { image: require("../../assets/images/caroseal2.png") },
+  { image: require("../../assets/images/caroseal3.png") },
 ];
 
 export default function Home() {
@@ -24,13 +24,13 @@ export default function Home() {
   const { width } = Dimensions.get("window");
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.white }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#eafff3" }}>
       <View style={styles.container}>
         <ScrollView
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
-          style={{ marginTop: 10 }}
+          style={{ marginTop: 10, borderRadius: 10 }}
         >
           {images.map((img, index) => (
             <Image
@@ -145,25 +145,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   nameLabelText: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 6,
     textAlign: "center",
-    color: Colors.black,
+    color: Colors.primaryColor,
     backgroundColor: Colors.white,
-    paddingVertical: 2,
-    fontSize: 12,
+    paddingVertical: 4,
+    fontSize: 10,
+    fontWeight: 500,
     borderRadius: 16,
     overflow: "hidden",
   },
   containerBot: {
-    backgroundColor: "#eafff3",
+    backgroundColor: "#fff",
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#fcbf49",
     flexDirection: "row",
     alignItems: "center",
     padding: 13,
     marginTop: 10,
+    marginHorizontal: 5,
+
+    // Shadow for iOS
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+
+    // Shadow for Android
+    elevation: 5,
   },
+
   logo: {
     width: 40,
     height: 40,
