@@ -80,11 +80,6 @@ export const aimags: Aimag[] = [
         image: "https://montsame.mn/files/65e00462b46b0.jpeg",
       },
       {
-        name: "Хар балгас",
-        description: "",
-        image: "https://montsame.mn/files/61761ffe35bc6.jpeg",
-      },
-      {
         name: "Билгэ хааны цогцолбор",
         description:
           "Билгэ хааны цогцолбор нь Архангай аймгийн Тариат сумын нутагт орших 8-9-р зууны үеийн түүхэн дурсгал юм. Энэ цогцолбор нь Монголын түүх, соёлын чухал төв юм.",

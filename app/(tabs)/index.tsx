@@ -1,7 +1,7 @@
 import Colors from "@/constants/Colors";
 import { aimags, allSurveys } from "@/constants/Data";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -22,11 +22,31 @@ const images = [
 export default function Home() {
   const router = useRouter();
   const { width } = Dimensions.get("window");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollRef = useRef<ScrollView | null>(null);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      let nextIndex = currentIndex + 1;
+      if (nextIndex >= images.length) nextIndex = 0;
+      setCurrentIndex(nextIndex);
+
+      if (scrollRef.current) {
+        scrollRef.current.scrollTo({
+          x: nextIndex * (width - 20), // matches your image width style
+          animated: true,
+        });
+      }
+    }, 3000);
+
+    return () => clearInterval(intervalId);
+  }, [currentIndex, width]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#eafff3" }}>
       <View style={styles.container}>
         <ScrollView
+          ref={scrollRef}
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
@@ -123,15 +143,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: 10,
     height: 150,
+    marginBottom: 10,
   },
   imageWrapper: {
     position: "relative",
     height: 150,
     borderRadius: 10,
-    overflow: "hidden",
+    overflow: "visible",
     borderColor: Colors.primaryColor,
-    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 4, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
+
   itemImage: {
     width: "100%",
     height: "100%",

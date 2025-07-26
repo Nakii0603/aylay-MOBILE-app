@@ -1,6 +1,6 @@
 import { aimags } from "@/constants/Data";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
   Button,
   Dimensions,
@@ -21,7 +21,13 @@ export default function AimagDetail() {
   const aimag = aimags.find((a) => a.id === aimagId);
 
   const screenWidth = Dimensions.get("window").width;
-  const cardWidth = (screenWidth - 60) / 2; // 20 (padding) * 2 + 10 (gap)
+  const screenHeight = Dimensions.get("window").height;
+  const isTablet = screenHeight > 800;
+  const headerImageHeight = isTablet ? 400 : 350;
+  const cardWidth = (screenWidth - 60) / 2;
+
+  // Дэлгэрэнгүй текст харуулахад ашиглана
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   return (
     <>
@@ -29,10 +35,10 @@ export default function AimagDetail() {
       <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
         <ScrollView>
           {/* HEADER IMAGE */}
-          {aimag?.source ? (
+          {aimag?.image ? (
             <Image
               source={aimag.image}
-              style={{ width: "100%", height: 350 }}
+              style={{ width: "100%", height: headerImageHeight }}
               resizeMode="cover"
             />
           ) : (
@@ -93,7 +99,7 @@ export default function AimagDetail() {
               numColumns={2}
               columnWrapperStyle={{ justifyContent: "space-between" }}
               scrollEnabled={false}
-              renderItem={({ item }) => (
+              renderItem={({ item, index }) => (
                 <View style={[styles.card, { width: cardWidth }]}>
                   <Image
                     source={{ uri: item.image }}
@@ -102,9 +108,27 @@ export default function AimagDetail() {
                   />
                   <View style={styles.cardContent}>
                     <Text style={styles.cardTitle}>{item.name}</Text>
-                    <Text style={styles.cardDescription}>
+                    <Text
+                      style={styles.cardDescription}
+                      numberOfLines={expandedIndex === index ? undefined : 3}
+                    >
                       {item.description || "Тайлбар байхгүй."}
                     </Text>
+
+                    {item.description && item.description.length > 50 && (
+                      <Text
+                        onPress={() =>
+                          setExpandedIndex(
+                            expandedIndex === index ? null : index
+                          )
+                        }
+                        style={styles.readMore}
+                      >
+                        {expandedIndex === index
+                          ? "Хураах"
+                          : "Дэлгэрэнгүй унших"}
+                      </Text>
+                    )}
                   </View>
                 </View>
               )}
@@ -208,6 +232,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#555",
     marginTop: 4,
+  },
+  readMore: {
+    color: "#007AFF",
+    marginTop: 4,
+    fontSize: 13,
   },
   backButtonContainer: {
     position: "absolute",
