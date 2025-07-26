@@ -31,8 +31,8 @@ export default function AimagDetail() {
           {/* HEADER IMAGE */}
           {aimag?.source ? (
             <Image
-              source={aimag.source}
-              style={{ width: "100%", height: 220 }}
+              source={aimag.image}
+              style={{ width: "100%", height: 350 }}
               resizeMode="cover"
             />
           ) : (
