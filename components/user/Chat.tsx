@@ -32,7 +32,7 @@ export default function Chat() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${SERVER_URI}/api/chat/`, {
+      const res = await fetch(`${SERVER_URI}/api/chatMessage/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: trimmedInput }),
