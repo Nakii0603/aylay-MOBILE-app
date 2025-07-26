@@ -1166,7 +1166,7 @@ export const quizzes = [
 export const allSurveys = [
   {
     id: 1,
-    section: "1. Зэрлэг Байгальд Амьд Үлдэх Чадвар",
+    section: "Зэрлэг Байгальд Амьд Үлдэх Чадвар",
     source: require("@/assets/images/Artboard1.jpg"),
     questions: [
       {
@@ -1264,7 +1264,7 @@ export const allSurveys = [
   {
     id: 2,
     source: require("@/assets/images/Artboard2.jpg"),
-    section: "2. Таны Аяллын IQ хэд вэ?",
+    section: "Таны Аяллын IQ хэд вэ?",
     questions: [
       {
         question: "Францын нийслэл хаана вэ?",
@@ -1361,7 +1361,7 @@ export const allSurveys = [
   {
     id: 3,
     source: require("@/assets/images/Artboard3.jpg"),
-    section: "3. Та Ганцаараа Аялагч уу, Багаараа Аялагч уу?",
+    section: "Та Ганцаараа Аялагч уу, Багаараа Аялагч уу?",
     questions: [
       {
         question: "Амралтын өдрөөр юу хийх дуртай вэ?",
@@ -1424,7 +1424,7 @@ export const allSurveys = [
   {
     id: 4,
     source: require("@/assets/images/Artboard4.jpg"),
-    section: "4. Таны Дараагийн Аяллын Газар Хаана Вэ?",
+    section: "Таны Дараагийн Аяллын Газар Хаана Вэ?",
     questions: [
       {
         question: "Та аль газрыг илүүд үздэг вэ?",
@@ -1476,7 +1476,7 @@ export const allSurveys = [
   {
     id: 5,
     source: require("@/assets/images/Artboard4.jpg"),
-    section: "5. Аяллын Тоглоом",
+    section: "Аяллын Тоглоом",
     questions: [
       {
         question: "Таны аяллын дундаж хугацаа хэд вэ?",
@@ -1519,7 +1519,7 @@ export const allSurveys = [
   {
     id: 6,
     source: require("@/assets/images/Artboard4.jpg"),
-    section: "6. Аяллын Үндсэн Үгс",
+    section: "Аяллын Үндсэн Үгс",
     questions: [
       {
         question: "Аяллын үеэр хамгийн их хэрэглэгддэг үг юу вэ?",
@@ -1562,7 +1562,7 @@ export const allSurveys = [
   {
     id: 7,
     source: require("@/assets/images/Artboard4.jpg"),
-    section: "7. Аяллын Асуулга",
+    section: "Аяллын Асуулга",
     questions: [
       {
         question: "Аялалд хамгийн их анхаарал хандуулах зүйл юу вэ?",

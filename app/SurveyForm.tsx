@@ -1,7 +1,9 @@
 import Colors from "@/constants/Colors";
+import { allSurveys, result } from "@/constants/Data";
+import { useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,116 +11,71 @@ import {
   View,
 } from "react-native";
 
-const questions = [
-  {
-    id: 1,
-    title: "Зэрлэг Байгальд Амьд Үлдэх Чадвар",
-    questions: [
-      {
-        question: "Төөрвөл хамгийн түрүүнд юу хийх вэ?",
-        options: [
-          { label: "Утас ашиглан тусламж дуудах", score: 1 },
-          { label: "Амьсгал авч тайвшрах", score: 2 },
-          { label: "Сүүлчийн чиглэлээ тогтоох", score: 3 },
-          { label: "Гэр орчмоо эрэлхийлэх", score: 4 },
-        ],
-      },
-      {
-        question: "Ойд гал гаргах хамгийн энгийн арга юу вэ?",
-        options: [
-          { label: "Хатаасан модыг үрж үрж гал гаргах", score: 4 },
-          { label: "Гэрлийн тусгал ашиглах", score: 2 },
-          { label: "Зоригтой чулуугаар үсрэх", score: 1 },
-          { label: "Хөнгөн цагаан зүйл ашиглах", score: 3 },
-        ],
-      },
-      {
-        question: "Байгалд хамгийн амархан олддог хоол юу вэ?",
-        options: [
-          { label: "Үр тариа", score: 1 },
-          { label: "Үхрийн мах", score: 2 },
-          { label: "Жимс жимсгэнэ", score: 3 },
-          { label: "Загас", score: 4 },
-        ],
-      },
-      {
-        question: "Усыг аюулгүй болгохын тулд юу хийх вэ?",
-        options: [
-          { label: "Шууд уух", score: 1 },
-          { label: "Буцалгах", score: 4 },
-          { label: "Шүүлтүүрээр шүүх", score: 3 },
-          { label: "Хөгцтэй газраас хол байх", score: 2 },
-        ],
-      },
-      {
-        question: "Анхны тусламжийн багцад юу заавал байх ёстой вэ?",
-        options: [
-          { label: "Хавчаар", score: 1 },
-          { label: "Халуун ус", score: 2 },
-          { label: "Халуурдаг эм", score: 3 },
-          { label: "Хавдсан тасалгаа", score: 4 },
-        ],
-      },
-      {
-        question: "Хоноглох газраа хэрхэн сонгох вэ?",
-        options: [
-          { label: "Нилээд тайван, ус ойрхон", score: 3 },
-          { label: "Тэнгэр үзэгдэх газар", score: 2 },
-          { label: "Хаашаа салхи үлээж байгааг харах", score: 4 },
-          { label: "Хажуугаар зам өнгөрдөг газар", score: 1 },
-        ],
-      },
-      {
-        question: "Зэрлэг амьтнаас хэрхэн хамгаалах вэ?",
-        options: [
-          { label: "Чимээ гаргах", score: 4 },
-          { label: "Ганцаараа аялах", score: 1 },
-          { label: "Тасалгааны гэртэй байх", score: 3 },
-          { label: "Өөрийгөө жижиг харагдуулах", score: 2 },
-        ],
-      },
-      {
-        question: "Хөлдсөн үед юу түрүүлж дулаацуулдаг вэ?",
-        options: [
-          { label: "Гараа", score: 1 },
-          { label: "Нуруу", score: 2 },
-          { label: "Хөл", score: 4 },
-          { label: "Толгой", score: 3 },
-        ],
-      },
-      {
-        question: "Байгальд дохио өгөх хамгийн энгийн арга юу вэ?",
-        options: [
-          { label: "Гал гаргаж утаа гаргах", score: 4 },
-          { label: "Чимээ гаргах", score: 3 },
-          { label: "Гар дохио өгөх", score: 2 },
-          { label: "Чичирхийлэх", score: 1 },
-        ],
-      },
-      {
-        question: "Салхи болон нарны чиглэлээр байрлал тогтоох уу?",
-        options: [
-          { label: "Нарны байрлал ашиглах", score: 4 },
-          { label: "Салхины дуу сонсох", score: 3 },
-          { label: "Үнэрээр чиглэлээ мэдэх", score: 1 },
-          { label: "Тэнгэрийн од ашиглах", score: 2 },
-        ],
-      },
-    ],
-  },
+// --- Төрлийн тодорхойлолтууд ---
+type AnswerOption = {
+  text: string;
+  score: number | string;
+  value?: string;
+};
 
-  // Add next sections in same structure here...
+type Question = {
+  question: string;
+  answers: AnswerOption[];
+};
 
-  // For brevity, you can add more sections/questions here as needed.
-];
+type Survey = {
+  id: number;
+  section: string;
+  questions: Question[];
+};
+
+type ScoreRange = {
+  range: string; 
+  conclusion: string;
+};
+
+type FrequencyResult = {
+  choice: string;
+  conclusion: string;
+};
+
+type ResultEntry = {
+  title: string;
+  scoreRanges?: ScoreRange[];
+  frequencyResults?: FrequencyResult[];
+  note?: string;
+};
+
+type ResultMap = {
+  [key: string]: ResultEntry;
+};
+
+// ----------------------------------
 
 export default function SurveyForm() {
-  const allQuestions = questions.flatMap((section) => section.questions);
+  const { surveyId } = useLocalSearchParams<{ surveyId?: string }>();
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState(Array(allQuestions.length).fill(null));
+  const selectedSurvey: Survey | undefined = allSurveys.find(
+    (survey) => survey.id.toString() === surveyId
+  );
 
-  const currentQuestion = allQuestions[currentIndex];
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [answers, setAnswers] = useState<(number | null)[]>(
+    Array(selectedSurvey?.questions.length || 0).fill(null)
+  );
+  const [showResult, setShowResult] = useState<boolean>(false);
+  const [totalScore, setTotalScore] = useState<number>(0);
+
+  if (!selectedSurvey) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: "red" }}>Судалгаа олдсонгүй!</Text>
+      </View>
+    );
+  }
+
+  const questions: Question[] = selectedSurvey.questions;
+  const currentQuestion: Question = questions[currentIndex];
 
   function selectOption(index: number) {
     const newAnswers = [...answers];
@@ -126,33 +83,26 @@ export default function SurveyForm() {
     setAnswers(newAnswers);
   }
 
-  function calculateMaxScore() {
-    return allQuestions.reduce((sum, question) => {
-      const maxOptionScore = Math.max(...question.options.map((o) => o.score));
-      return sum + maxOptionScore;
-    }, 0);
+  function calculateTotalScore(): number {
+    return answers.reduce((sum: number, answerIndex, idx) => {
+      if (answerIndex === null) return sum;
+      const score = questions[idx].answers[answerIndex].score;
+      return sum + Number(score);
+    }, 0); 
   }
+
   function handleNext() {
     if (answers[currentIndex] === null) {
       alert("Та сонголтоо хийнэ үү");
       return;
     }
-    if (currentIndex < allQuestions.length - 1) {
+
+    if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      // Submit logic here
-      const totalScore = answers.reduce((sum, answerIndex) => {
-        if (answerIndex === null) return sum;
-        const optionScore = currentQuestion.options[answerIndex].score;
-        return sum + optionScore;
-      }, 0);
-      calculateMaxScore();
-
-      Alert.alert(
-        "Төгсгөл",
-        `Таны нийт оноо:  ${calculateTotalScore()}/${calculateMaxScore()}`,
-        [{ text: "OK" }]
-      );
+      const total = calculateTotalScore();
+      setTotalScore(total);
+      setShowResult(true);
     }
   }
 
@@ -160,24 +110,56 @@ export default function SurveyForm() {
     if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
   }
 
-  // We need to sum all scores properly, not just current question's option:
-  function calculateTotalScore() {
-    return answers.reduce((sum, answerIndex, idx) => {
-      if (answerIndex === null) return sum;
-      return sum + allQuestions[idx].options[answerIndex].score;
-    }, 0);
+  function getConclusion(): string {
+    const resultMap: ResultMap = result.results;
+    const surveyResult = resultMap[surveyId || ""];
+    if (!surveyResult) return "Дүгнэлт олдсонгүй.";
+
+    if (surveyResult.scoreRanges) {
+      for (let range of surveyResult.scoreRanges) {
+        const [min, max] = range.range.split("–").map(Number);
+        if (totalScore >= min && totalScore <= max) {
+          return range.conclusion;
+        }
+      }
+    }
+
+    if (surveyResult.frequencyResults) {
+      const choiceCounts: Record<string, number> = {};
+      answers.forEach((answerIndex, idx) => {
+        if (answerIndex !== null) {
+          const choiceLetter =
+            questions[idx].answers[answerIndex].value?.toUpperCase();
+          if (choiceLetter) {
+            choiceCounts[choiceLetter] = (choiceCounts[choiceLetter] || 0) + 1;
+          }
+        }
+      });
+
+      const mostFrequent = Object.entries(choiceCounts).sort(
+        (a, b) => b[1] - a[1]
+      )[0]?.[0];
+
+      const found = surveyResult.frequencyResults.find(
+        (item) => item.choice === mostFrequent
+      );
+
+      return found?.conclusion || "Дүгнэлт олдсонгүй.";
+    }
+
+    return "Тохирох дүгнэлт олдсонгүй.";
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Аялагч хүний сорил</Text>
+      <Text style={styles.title}>{selectedSurvey.section}</Text>
       <Text style={styles.questionCounter}>
-        Асуулт {currentIndex + 1} / {allQuestions.length}
+        Асуулт {currentIndex + 1} / {questions.length}
       </Text>
       <Text style={styles.questionText}>{currentQuestion.question}</Text>
 
       <ScrollView style={{ marginVertical: 20, maxHeight: 250 }}>
-        {currentQuestion.options.map((option, idx) => {
+        {currentQuestion.answers.map((option, idx) => {
           const selected = answers[currentIndex] === idx;
           return (
             <TouchableOpacity
@@ -191,7 +173,7 @@ export default function SurveyForm() {
                   selected && styles.selectedOptionText,
                 ]}
               >
-                {option.label}
+                {option.text}
               </Text>
             </TouchableOpacity>
           );
@@ -199,51 +181,54 @@ export default function SurveyForm() {
       </ScrollView>
 
       <View style={styles.buttonRow}>
-        {currentIndex > 0 ? (
-          <>
-            <View style={{ flex: 1, alignItems: "flex-start" }}>
-              <TouchableOpacity onPress={handleBack} style={styles.navButton}>
-                <Text style={styles.navButtonText}>Өмнөх</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={{ flex: 1, alignItems: "flex-end" }}>
-              <TouchableOpacity
-                onPress={handleNext}
-                style={[
-                  styles.navButton,
-                  !answers[currentIndex] && styles.disabledButton,
-                ]}
-                disabled={answers[currentIndex] === null}
-              >
-                <Text style={styles.navButtonText}>
-                  {currentIndex === allQuestions.length - 1
-                    ? "Submit"
-                    : "Дараах"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        ) : (
-          <View style={{ flex: 1, alignItems: "flex-end" }}>
-            <TouchableOpacity
-              onPress={handleNext}
-              style={[
-                styles.navButton,
-                !answers[currentIndex] && styles.disabledButton,
-              ]}
-              disabled={answers[currentIndex] === null}
-            >
-              <Text style={styles.navButtonText}>
-                {currentIndex === allQuestions.length - 1 ? "Submit" : "Дараах"}
-              </Text>
+        {currentIndex > 0 && (
+          <View style={{ flex: 1, alignItems: "flex-start" }}>
+            <TouchableOpacity onPress={handleBack} style={styles.navButton}>
+              <Text style={styles.navButtonText}>Өмнөх</Text>
             </TouchableOpacity>
           </View>
         )}
+        <View style={{ flex: 1, alignItems: "flex-end" }}>
+          <TouchableOpacity
+            onPress={handleNext}
+            style={[
+              styles.navButton,
+              answers[currentIndex] === null && styles.disabledButton,
+            ]}
+            disabled={answers[currentIndex] === null}
+          >
+            <Text style={styles.navButtonText}>
+              {currentIndex === questions.length - 1 ? "Дуусгах" : "Дараах"}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
+
+      <Modal
+        visible={showResult}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowResult(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>🎉 Таны Дүгнэлт</Text>
+            <Text style={styles.resultText}>{getConclusion()}</Text>
+            <Text style={styles.note}>Нийт оноо: {totalScore}</Text>
+            <TouchableOpacity
+              onPress={() => setShowResult(false)}
+              style={[styles.navButton, { marginTop: 20 }]}
+            >
+              <Text style={styles.navButtonText}>Хаах</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
+// ---------------------------- Styles
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
@@ -295,7 +280,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
-    
   },
   navButtonText: {
     color: "white",
@@ -304,5 +288,31 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     backgroundColor: "#aaa",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.4)",
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 24,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  resultText: {
+    fontSize: 18,
+    textAlign: "center",
+  },
+  note: {
+    fontSize: 14,
+    color: "#777",
+    marginTop: 10,
   },
 });

@@ -17,32 +17,6 @@ export default function Home() {
   const router = useRouter();
   const { width } = Dimensions.get("window");
 
-  const images = [
-    {
-      id: 1,
-      source: require("@/assets/images/Artboard1.jpg"),
-      name: "Аялагч хүний сорил",
-      price: "үнэгүй",
-    },
-    {
-      id: 2,
-      source: require("@/assets/images/Artboard2.jpg"),
-      name: "Аялагч хүний сорил",
-      price: "үнэгүй",
-    },
-    {
-      id: 3,
-      source: require("@/assets/images/Artboard3.jpg"),
-      name: "Аялагч хүний сорил",
-      price: "үнэгүй",
-    },
-    {
-      id: 4,
-      source: require("@/assets/images/Artboard4.jpg"),
-      name: "Аялагч хүний сорил",
-      price: "үнэгүй",
-    },
-  ];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.white }}>
@@ -57,7 +31,7 @@ export default function Home() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.scrollContainer}
           >
-            {images.map((item, index) => (
+            {allSurveys.map((item, index) => (
               <TouchableOpacity
                 key={item.id}
                 style={[
@@ -67,21 +41,16 @@ export default function Home() {
                 onPress={() =>
                   router.push({
                     pathname: "/SurveyInfo",
-                    params: { id: item.id.toString(), name: item.name },
+                    params: { id: item.id.toString(), name: item.section },
                   })
                 }
                 activeOpacity={0.8}
               >
                 <Image source={item.source} style={styles.itemImage} />
 
-                {/* Price Label */}
-                {item.price && (
-                  <Text style={styles.priceLabel}>{item.price}</Text>
-                )}
-
                 {/* Name Label */}
                 <View style={styles.nameLabelContainer}>
-                  <Text style={styles.nameLabelText}>{item.name}</Text>
+                  <Text style={styles.nameLabelText}>{item.section}</Text>
                 </View>
               </TouchableOpacity>
             ))}
@@ -153,18 +122,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     borderRadius: 10,
-  },
-  priceLabel: {
-    position: "absolute",
-    top: 5,
-    left: 5,
-    color: Colors.black,
-    backgroundColor: Colors.white,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    fontSize: 12,
-    fontWeight: "600",
   },
   nameLabelContainer: {
     position: "absolute",
