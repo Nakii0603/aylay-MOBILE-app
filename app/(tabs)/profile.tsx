@@ -1,6 +1,7 @@
 import Colors from "@/constants/Colors";
 import { AntDesign } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Image,
@@ -12,17 +13,49 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Ionicons from "react-native-vector-icons/Ionicons";
 
 export default function ProfileScreen() {
   const [profileImage, setProfileImage] = useState<string>("");
   const router = useRouter();
+  const [userName, setUserName] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [userPhone, setUserPhone] = useState<string>("");
 
-  // Navigate to terms screen modal
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadUserInfo = async () => {
+        try {
+          const storedData = await AsyncStorage.getItem("userInfo");
+          if (storedData) {
+            const parsed = JSON.parse(storedData);
+            const fullName = `${parsed.firstName || ""} ${
+              parsed.lastName || ""
+            }`.trim();
+            setUserName(fullName || "");
+            setUserEmail(parsed.email || "");
+            setUserPhone(parsed.phone || "");
+          }
+        } catch (error) {
+          console.error("Failed to load user info:", error);
+        }
+      };
+
+      loadUserInfo();
+    }, [])
+  );
+
   const handleTermsScreen = () => {
-    router.push("/terms");
+    router.push("/Terms");
   };
-
+  const handleFAQScreen = () => {
+    router.push("/(route)/FAQ");
+  };
+  const handleInfoNotScreen = () => {
+    router.push("/(route)/InfoNot");
+  };
+  const handleUserInfoNotScreen = () => {
+    router.push("/(route)/UserInfo");
+  };
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar
@@ -47,27 +80,35 @@ export default function ProfileScreen() {
               />
             </View>
             <View style={styles.infoContainer}>
-              <Text style={styles.memberTypeText}>User Name</Text>
-              <View style={styles.scoreRowContainer}>
-                <Text style={styles.scoreText}>Aylay</Text>
-              </View>
+              <Text style={styles.memberTypeText}>
+                Нэр: {userName || "Оруулаагүй"}
+              </Text>
+              <Text style={styles.infoText}>
+                Имэйл: {userEmail || "Оруулаагүй"}
+              </Text>
+              <Text style={styles.infoText}>
+                Утас: {userPhone || "Оруулаагүй"}
+              </Text>
             </View>
           </View>
         </View>
       </View>
       <View style={styles.menu}>
         <ScrollView>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity
+            onPress={handleUserInfoNotScreen}
+            style={styles.menuItem}
+          >
             <View style={styles.menuItemContent}>
               <Image
-                source={require("@/assets/icons/profInformationMenu.png")}
+                source={require("@/assets/icons/lock.png")}
                 style={{ width: 30, height: 30 }}
               />
               <Text style={styles.menuItemText}>Миний мэдээлэл</Text>
             </View>
             <AntDesign name="right" size={20} color={Colors.primaryColor} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity onPress={handleFAQScreen} style={styles.menuItem}>
             <View style={styles.menuItemContent}>
               <Image
                 source={require("@/assets/icons/profQuestionMenu.png")}
@@ -87,23 +128,26 @@ export default function ProfileScreen() {
             </View>
             <AntDesign name="right" size={20} color={Colors.primaryColor} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity
+            onPress={handleInfoNotScreen}
+            style={styles.menuItem}
+          >
             <View style={styles.menuItemContent}>
               <Image
-                source={require("@/assets/icons/profTermMenu.png")}
+                source={require("@/assets/icons/insurance.png")}
                 style={{ width: 30, height: 30 }}
               />
               <Text style={styles.menuItemText}>Даатгал</Text>
             </View>
             <AntDesign name="right" size={20} color={Colors.primaryColor} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
+          {/* <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemContent}>
               <Ionicons name="log-out" size={26} color={Colors.red} />
               <Text style={styles.menuItemLogoutText}>Системээс гарах</Text>
             </View>
             <AntDesign name="right" size={20} color={Colors.red} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -156,15 +200,11 @@ const styles = StyleSheet.create({
     fontFamily: "Inter",
     marginBottom: 5,
   },
-  scoreText: {
+  infoText: {
     color: Colors.white,
-    fontSize: 23,
-    fontWeight: "bold",
-  },
-  scoreRowContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 5,
+    fontSize: 14,
+    fontFamily: "Inter",
+    marginTop: 2,
   },
   menu: {
     flex: 1,
@@ -173,7 +213,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 10,
     marginTop: 10,
     padding: 30,
-    zIndex:10
+    zIndex: 10,
   },
   menuItem: {
     flexDirection: "row",

@@ -96,6 +96,7 @@ export default function Chat() {
             onChangeText={setInput}
             placeholder="Асуух зүйлээ бичнэ үү..."
             onSubmitEditing={sendMessage}
+            placeholderTextColor="#000"
             returnKeyType="send"
             editable={!loading}
           />
