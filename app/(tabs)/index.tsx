@@ -1,10 +1,13 @@
 import Colors from "@/constants/Colors";
 import { aimags, allSurveys } from "@/constants/Data";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Checkbox from "expo-checkbox";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,8 +25,28 @@ const images = [
 export default function Home() {
   const router = useRouter();
   const { width } = Dimensions.get("window");
-  const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef<ScrollView | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const [modalVisibleTerms, setModalVisibleTerms] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+
+  const TERMS_KEY = "aylay_terms_accepted";
+
+  useEffect(() => {
+    const checkTermsAccepted = async () => {
+      const accepted = await AsyncStorage.getItem(TERMS_KEY);
+      if (!accepted) {
+        setModalVisibleTerms(true);
+      }
+    };
+    checkTermsAccepted();
+  }, []);
+
+  const handleAgree = async () => {
+    await AsyncStorage.setItem(TERMS_KEY, "true");
+    setModalVisibleTerms(false);
+  };
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -33,7 +56,7 @@ export default function Home() {
 
       if (scrollRef.current) {
         scrollRef.current.scrollTo({
-          x: nextIndex * (width - 20), // matches your image width style
+          x: nextIndex * (width - 20),
           animated: true,
         });
       }
@@ -45,6 +68,7 @@ export default function Home() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#eafff3" }}>
       <View style={styles.container}>
+        {/* Carousel */}
         <ScrollView
           ref={scrollRef}
           horizontal
@@ -60,6 +84,8 @@ export default function Home() {
             />
           ))}
         </ScrollView>
+
+        {/* Horizontal Scroll */}
 
         <View>
           <ScrollView
@@ -83,8 +109,6 @@ export default function Home() {
                 activeOpacity={0.8}
               >
                 <Image source={item.source} style={styles.itemImage} />
-
-                {/* Name Label */}
                 <View style={styles.nameLabelContainer}>
                   <Text style={styles.nameLabelText}>{item.section}</Text>
                 </View>
@@ -92,7 +116,7 @@ export default function Home() {
             ))}
           </ScrollView>
         </View>
-
+        {/* Aimags List */}
         <ScrollView
           style={{ marginTop: 10 }}
           contentContainerStyle={{ paddingBottom: 20 }}
@@ -126,6 +150,116 @@ export default function Home() {
           ))}
         </ScrollView>
       </View>
+
+      {/* TERMS MODAL */}
+      <Modal
+        transparent
+        visible={modalVisibleTerms}
+        onRequestClose={() => setModalVisibleTerms(false)}
+      >
+        <View style={styles.modalContainerTerms}>
+          <View style={styles.modalContentTerms}>
+            <ScrollView>
+              <Text style={styles.modalTitle}>
+                Aylay Апп – Үйлчилгээний нөхцөл
+              </Text>
+              <Text style={styles.termsText}>
+                Сүүлд шинэчилсэн: [2025.07.25]
+                {"\n\n"}
+                Энэхүү үйлчилгээний нөхцөл нь Aylay аппликейшнийг ашиглаж буй
+                бүх хэрэглэгчид дагаж мөрдөх журам, эрх, үүргийг тогтооно.
+              </Text>
+
+              <Text style={styles.termsText}>
+                1. Ерөнхий заалт
+                {"\n"}
+                Aylay нь Монгол Улсад дотоод аялал жуулчлалын төлөвлөлт,
+                мэдээлэл, хамтрагч олох, даатгал, санхүүгийн хуваарилалт зэрэг
+                цогц үйлчилгээ үзүүлэх ухаалаг гар утасны апп юм. Энэхүү апп-ийг
+                ашигласнаар та энэхүү нөхцлийг бүрэн зөвшөөрч байгаагаа
+                илэрхийлж байна.
+              </Text>
+
+              <Text style={styles.termsText}>
+                2. Бүртгэл ба хэрэглэгчийн мэдээлэл
+                {"\n"}• Та үнэн зөв, бодит мэдээллээр бүртгүүлнэ.
+                {"\n"}• Та өөрийн бүртгэлийн мэдээллийг нууцалж, гуравдагч
+                этгээдэд дамжуулахгүй байх үүрэгтэй.
+                {"\n"}• Хуурамч мэдээлэл, гуравдагч этгээдийн нэрээр
+                бүртгүүлэхийг хориглоно.
+              </Text>
+
+              <Text style={styles.termsText}>
+                3. Үйлчилгээний агуулга
+                {"\n"}Aylay апп дараах үндсэн үйлчилгээг үзүүлнэ:
+                {"\n"}• Аяллын маршрут төлөвлөлт
+                {"\n"}• Offline газрын зураг
+                {"\n"}• Аяллын хамтрагч олох
+                {"\n"}• Аяллын даатгалын холболт
+                {"\n"}• Төлбөрийн хуваарилалт
+                {"\n"}• AI туслах
+                {"\n"}• Урамшуулал, онооны систем
+                {"\n\n"}Aylay нь зарим үйлчилгээг гуравдагч байгууллагаар
+                дамжуулан үзүүлж болох ба үүнтэй холбогдсон нөхцөл, журам тус
+                тусын сайтад хамаарна.
+              </Text>
+
+              <Text style={styles.termsText}>
+                4. Оюуны өмч
+                {"\n"}Aylay аппын дизайны элемент, лого, контент, код, өгөгдлийн
+                сан зэрэг нь Aylay-ийн өмч бөгөөд зохиогчийн эрхийн тухай
+                хуулиар хамгаалагдсан. Зөвшөөрөлгүй ашиглахыг хориглоно.
+              </Text>
+
+              <Text style={styles.termsText}>
+                5. Ашиглалтын хязгаарлалт
+                {"\n"}• Апп-ийг хууль бус зорилгоор ашиглахыг хориглоно.
+                {"\n"}• Апп-ийг эвдэх, өөрчлөх, дахин түгээх, сөрөг код
+                суулгахыг хориглоно.
+                {"\n"}• Aylay нь хэрэглэгчийн буруутай үйлдлээс үүдэлтэй аливаа
+                хохирлыг хариуцахгүй.
+              </Text>
+
+              <Text style={styles.termsText}>
+                6. Үйлчилгээний өөрчлөлт
+                {"\n"}Aylay нь үйлчилгээний нөхцөл, агуулга, функциональ байдлыг
+                урьдчилан мэдэгдэлгүйгээр шинэчлэх эрхтэй.
+              </Text>
+
+              <Text style={styles.termsText}>
+                7. Хэрэглэгчийн хариуцлага
+                {"\n"}Хэрэглэгч апп ашиглахдаа хууль зүйн болон ёс зүйн хэм
+                хэмжээг баримтална. Зөрчил гаргасан тохиолдолд үйлчилгээний
+                эрхийг хязгаарлах, бүртгэлийг устгах эрхтэй.
+              </Text>
+
+              <Text style={styles.termsText}>
+                8. Мэдэгдэл ба холбоо
+                {"\n"}Хэрэглэгчтэй холбоо тогтоохдоо апп доторх мэдэгдэл болон
+                бүртгэлтэй цахим шуудан ашиглана. Санал хүсэлт, гомдол хүлээн
+                авах хаяг: support@aylay.mn
+              </Text>
+
+              <View style={styles.checkboxContainer}>
+                <Checkbox value={agreed} onValueChange={setAgreed} />
+
+                <Text style={{ marginLeft: 10 }}>Би зөвшөөрч байна</Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={handleAgree}
+                disabled={!agreed}
+                style={[
+                  styles.agreeButton,
+                  { backgroundColor: agreed ? Colors.primaryColor : "#ccc" },
+                ]}
+              >
+                <Text style={styles.agreeText}>Үргэлжлүүлэх</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -134,6 +268,45 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 10,
     flex: 1,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  termsText: {
+    fontSize: 14,
+    color: "#333",
+    marginBottom: 20,
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  agreeButton: {
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  agreeText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+
+  modalContainerTerms: {
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContentTerms: {
+    width: "100%",
+    height: "60%",
+    backgroundColor: "white",
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   mainImage: {
     height: 300,

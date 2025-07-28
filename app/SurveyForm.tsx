@@ -1,6 +1,7 @@
 import Colors from "@/constants/Colors";
 import { allSurveys, result } from "@/constants/Data";
-import { useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Modal,
@@ -30,7 +31,7 @@ type Survey = {
 };
 
 type ScoreRange = {
-  range: string; 
+  range: string;
   conclusion: string;
 };
 
@@ -54,6 +55,7 @@ type ResultMap = {
 
 export default function SurveyForm() {
   const { surveyId } = useLocalSearchParams<{ surveyId?: string }>();
+  const router = useRouter();
 
   const selectedSurvey: Survey | undefined = allSurveys.find(
     (survey) => survey.id.toString() === surveyId
@@ -88,7 +90,7 @@ export default function SurveyForm() {
       if (answerIndex === null) return sum;
       const score = questions[idx].answers[answerIndex].score;
       return sum + Number(score);
-    }, 0); 
+    }, 0);
   }
 
   function handleNext() {
@@ -152,6 +154,9 @@ export default function SurveyForm() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={router.back} style={styles.backButton}>
+        <Ionicons name="arrow-back" size={24} color={Colors.black} />
+      </TouchableOpacity>
       <Text style={styles.title}>{selectedSurvey.section}</Text>
       <Text style={styles.questionCounter}>
         Асуулт {currentIndex + 1} / {questions.length}
@@ -235,6 +240,11 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     flex: 1,
     backgroundColor: "#fff",
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
   },
   title: {
     fontSize: 22,

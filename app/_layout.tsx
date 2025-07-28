@@ -23,12 +23,31 @@ export default function RootLayout() {
         screenOptions={{
           headerTitleAlign: "center",
           headerBackVisible: false,
+          headerShown: false,
         }}
       >
         {/* Hide header for tabs */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
-        {/* Custom back button for SurveyInfo */}
+        {/* Terms modal */}
+        <Stack.Screen
+          name="Terms"
+          options={{
+            headerTitle: "",
+            headerShadowVisible: false,
+            headerShown: false,
+            headerLeft: () => (
+              <TouchableOpacity
+                onPress={() => router.back()}
+                style={{ paddingHorizontal: 15 }}
+              >
+                <AntDesign name="arrowleft" size={24} color="black" />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+
+        {/* Survey screens with custom back buttons */}
         <Stack.Screen
           name="SurveyInfo"
           options={{
@@ -44,7 +63,6 @@ export default function RootLayout() {
             ),
           }}
         />
-
         <Stack.Screen
           name="SurveyForm"
           options={{
@@ -61,7 +79,6 @@ export default function RootLayout() {
           }}
         />
 
-        {/* Default not-found screen */}
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

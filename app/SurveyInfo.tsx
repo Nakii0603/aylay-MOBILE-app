@@ -1,14 +1,17 @@
+import Colors from "@/constants/Colors";
+import { Ionicons } from "@expo/vector-icons"; // For a back arrow icon
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
-  View,
-  Text,
-  Image,
   Button,
-  StyleSheet,
+  Image,
+  SafeAreaView,
   ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import Colors from "@/constants/Colors";
 
 export default function SurveyInfo() {
   const router = useRouter();
@@ -21,41 +24,56 @@ export default function SurveyInfo() {
     description:
       "Та өөрийгөө байгалийн хатуу ширүүн нөхцөлд хэрхэн авч явах вэ гэдгийг мэдэхийг хүсч байна уу? Энэхүү сонирхолтой асуулга нь таны амьд үлдэх ур чадвар, бодит нөхцөлд хэрхэн зөв шийдвэр гаргах чадварыг шалгана.",
     questionCount: 10,
-    image: require("@/assets/trash/image.png"), 
+    image: require("@/assets/trash/image.png"),
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>{survey.name}</Text>
+    <SafeAreaView style={{ backgroundColor: "#fff", height: "100%" }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Back Button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color={Colors.black} />
+        </TouchableOpacity>
 
-      <Image source={survey.image} style={styles.image} />
+        <Text style={styles.title}>{survey.name}</Text>
 
-      <Text style={styles.description}>{survey.description}</Text>
+        <Image source={survey.image} style={styles.image} />
 
-      <Text style={styles.count}>{survey.questionCount} асуулт</Text>
+        <Text style={styles.description}>{survey.description}</Text>
 
-      <View style={styles.buttonWrapper}>
-        <Button
-          title="Судалгаа эхлүүлэх"
-          color={Colors.primary}
-          onPress={() =>
-            router.push({
-              pathname: "/SurveyForm",
-              params: { surveyId: id?.toString() ?? "" },
-            })
-          }
-        />
-      </View>
-    </ScrollView>
+        <Text style={styles.count}>{survey.questionCount} асуулт</Text>
+
+        <View style={styles.buttonWrapper}>
+          <Button
+            title="Судалгаа эхлүүлэх"
+            color={Colors.primary}
+            onPress={() =>
+              router.push({
+                pathname: "/SurveyForm",
+                params: { surveyId: id?.toString() ?? "" },
+              })
+            }
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     padding: 24,
-    backgroundColor: Colors.white,
     alignItems: "center",
     flexGrow: 1,
+  },
+  backButton: {
+    flexDirection: "row",
+    alignSelf: "flex-start",
+    alignItems: "center",
+    marginBottom: 16,
   },
   title: {
     fontSize: 22,

@@ -1,5 +1,6 @@
 import Colors from "@/constants/Colors";
 import { AntDesign } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Image,
@@ -14,20 +15,20 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 export default function ProfileScreen() {
-  const [token, setToken] = useState<string>("");
-  const [userError, setUserError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
   const [profileImage, setProfileImage] = useState<string>("");
-  
+  const router = useRouter();
+
+  // Navigate to terms screen modal
+  const handleTermsScreen = () => {
+    router.push("/terms");
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar
         barStyle="dark-content"
         backgroundColor={Colors.backgroundColor}
       />
-      <TouchableOpacity style={styles.backContainer}>
-        <Ionicons name="arrow-back" size={24} color={Colors.primaryColor} />
-      </TouchableOpacity>
       <View style={styles.card}>
         <View style={styles.content}>
           <Image
@@ -69,16 +70,6 @@ export default function ProfileScreen() {
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemContent}>
               <Image
-                source={require("@/assets/icons/profPinCodeMenu.png")}
-                style={{ width: 30, height: 30 }}
-              />
-              <Text style={styles.menuItemText}>Пин код өөрчлөх</Text>
-            </View>
-            <AntDesign name="right" size={20} color={Colors.primaryColor} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuItemContent}>
-              <Image
                 source={require("@/assets/icons/profQuestionMenu.png")}
                 style={{ width: 30, height: 30 }}
               />
@@ -86,7 +77,7 @@ export default function ProfileScreen() {
             </View>
             <AntDesign name="right" size={20} color={Colors.primaryColor} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={styles.menuItem} onPress={handleTermsScreen}>
             <View style={styles.menuItemContent}>
               <Image
                 source={require("@/assets/icons/profTermMenu.png")}
@@ -123,9 +114,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundColor,
-  },
-  backContainer: {
-    marginLeft: 10,
   },
   card: {
     backgroundColor: Colors.primaryColor,
@@ -185,6 +173,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 10,
     marginTop: 10,
     padding: 30,
+    zIndex:10
   },
   menuItem: {
     flexDirection: "row",
