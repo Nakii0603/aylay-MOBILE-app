@@ -44,14 +44,9 @@ export default function UserInfoForm() {
       return;
     }
 
-    if (changedFields.length > 1) {
-      Alert.alert("Анхааруулга", "Зөвхөн нэг талбар өөрчлөх боломжтой.");
-      return;
-    }
-
     try {
       await AsyncStorage.setItem("userInfo", JSON.stringify(data));
-      Alert.alert("Амжилттай", `${changedFields[0]} талбар хадгалагдлаа.`);
+      Alert.alert("Амжилттай хадгалагдлаа");
       setInitialData(data);
     } catch (error) {
       console.error("Мэдээлэл хадгалахад алдаа:", error);
