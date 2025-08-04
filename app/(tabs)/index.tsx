@@ -1,7 +1,7 @@
 import Colors from "@/constants/Colors";
 import { aimags, allSurveys } from "@/constants/Data";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Checkbox from "expo-checkbox";
+import { Checkbox } from "expo-checkbox";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   },
   modalContentTerms: {
     width: "100%",
-    height: "60%",
+    height: "70%",
     backgroundColor: "white",
     padding: 20,
     borderTopLeftRadius: 20,

@@ -20,6 +20,11 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDB2P8KhMhPcgJjCXiYygwQZVzDDkGqwBQ"
+        }
+      },
       "edgeToEdgeEnabled": true,
       "package": "com.amarasystem.Aylay"
     },
@@ -37,6 +42,13 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-maps",
+        {
+          "requestLocationPermission": true,
+          "locationPermission": "Allow Aylay to use your location"
         }
       ]
     ],

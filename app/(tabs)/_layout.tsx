@@ -75,9 +75,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="map"
         options={{
-          title: "Хайх",
+          title: "Газрын зураг",
           tabBarIcon: ({ focused }) => (
             <Image
               source={
