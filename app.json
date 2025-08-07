@@ -26,7 +26,13 @@
         }
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.amarasystem.Aylay"
+      "package": "com.amarasystem.Aylay",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -60,6 +66,12 @@
       "eas": {
         "projectId": "7de73ec1-d1e7-4b88-9f01-29863581e008"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/7de73ec1-d1e7-4b88-9f01-29863581e008"
     }
   }
 }
