@@ -118,7 +118,7 @@ export default function Home() {
         </View>
         {/* Aimags List */}
         <ScrollView
-          style={{ marginTop: 10 }}
+          style={{ marginTop: 10, marginBottom: 40 }}
           contentContainerStyle={{ paddingBottom: 20 }}
           showsVerticalScrollIndicator={false}
         >
