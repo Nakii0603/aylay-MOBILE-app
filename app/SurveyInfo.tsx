@@ -1,5 +1,5 @@
+import BackNav from "@/components/user/BackNav";
 import Colors from "@/constants/Colors";
-import { Ionicons } from "@expo/vector-icons"; // For a back arrow icon
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
@@ -7,9 +7,9 @@ import {
   Image,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -29,14 +29,12 @@ export default function SurveyInfo() {
 
   return (
     <SafeAreaView style={{ backgroundColor: "#fff", height: "100%" }}>
+      <BackNav />
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Back Button */}
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color={Colors.black} />
-        </TouchableOpacity>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={Colors.backgroundColor}
+        />
 
         <Text style={styles.title}>{survey.name}</Text>
 
@@ -65,15 +63,9 @@ export default function SurveyInfo() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 24,
-    alignItems: "center",
-    flexGrow: 1,
-  },
-  backButton: {
-    flexDirection: "row",
-    alignSelf: "flex-start",
-    alignItems: "center",
-    marginBottom: 16,
+    paddingHorizontal: 16,
+    flex: 1,
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 22,

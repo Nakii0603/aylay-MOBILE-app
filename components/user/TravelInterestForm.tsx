@@ -1,87 +1,49 @@
 import Colors from "@/constants/Colors";
+import { questions } from "@/constants/Data";
 import { SERVER_URI } from "@/utils/uri";
-import React, { useState } from "react";
+import axios from "axios";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
+  Dimensions,
   Modal,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
-interface QuestionType {
-  id: number;
-  question: string;
-  options: string[];
-}
-
-const questions: QuestionType[] = [
-  {
-    id: 1,
-    question: "Хаашаа аялахыг хүсэж байна вэ?",
-    options: ["Уул, ой", "Нуур, гол", "Хот дотор", "Түүхэн дурсгалт газар"],
-  },
-  {
-    id: 2,
-    question: "Хэнтэй аялмаар байна вэ?",
-    options: [
-      "Найзуудтайгаа",
-      "Ганцаараа",
-      "Гэр бүлтэйгээ",
-      "Ажлын хамт олонтой",
-    ],
-  },
-  {
-    id: 3,
-    question: "Ямар төрлийн аялал илүү сонирхолтой вэ?",
-    options: ["Адал явдалт", "Амралтын", "Соёлын", "Байгалийн"],
-  },
-  {
-    id: 4,
-    question: "Аялах хугацаа хэдэн хоног байх нь тохиромжтой вэ?",
-    options: ["1 өдөр", "2-3 өдөр", "4-5 өдөр", "7+ өдөр"],
-  },
-  {
-    id: 5,
-    question: "Аялахад зарцуулах төсөв (₮)?",
-    options: ["100к хүртэл", "100к–300к", "300к–600к", "600к+"],
-  },
-  {
-    id: 6,
-    question: "Таны амьдардаг газар?",
-    options: ["Улаанбаатар", "Дархан", "Эрдэнэт", "Бусад аймаг"],
-  },
-  {
-    id: 7,
-    question: "Аялахад хамгийн тохиромжтой улирал?",
-    options: ["Хавар", "Зун", "Намар", "Өвөл"],
-  },
-  {
-    id: 8,
-    question: "Аялах зай хэр хол байвал тохиромжтой вэ?",
-    options: ["50км дотор", "100км дотор", "300км дотор", "300км+"],
-  },
-  {
-    id: 9,
-    question: "Дотоод аялалд хамгийн чухал зүйл юу вэ?",
-    options: ["Үнэ", "Аюулгүй байдал", "Байгаль орчин", "Үйлчилгээний чанар"],
-  },
-  {
-    id: 10,
-    question: "Ямар тээврийн хэрэгсэл илүү тохиромжтой вэ?",
-    options: ["Хувийн машин", "Аяллын автобус", "Галт тэрэг", "Онгоц"],
-  },
-];
+const SCREEN_WIDTH = Dimensions.get("window").width;
 
 const TravelInterestForm: React.FC = () => {
+  const router = useRouter();
+  const params = useLocalSearchParams();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<{ [key: number]: string }>({});
+  const [loading, setLoading] = useState(false);
+  const [invoiceId, setInvoiceId] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [chatResponse, setChatResponse] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
+
+  // Animation value for slide
+  const animation = useRef(new Animated.Value(0)).current;
+
+  // Animate slide from left or right
+  const animateTransition = (direction: "next" | "prev") => {
+    animation.setValue(direction === "next" ? SCREEN_WIDTH : -SCREEN_WIDTH);
+    Animated.timing(animation, {
+      toValue: 0,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  };
 
   const handleSelect = (option: string) => {
     const questionId = questions[currentQuestion].id;
@@ -90,21 +52,107 @@ const TravelInterestForm: React.FC = () => {
 
   const next = () => {
     if (currentQuestion < questions.length - 1) {
+      animateTransition("next");
       setCurrentQuestion(currentQuestion + 1);
     }
   };
 
   const prev = () => {
     if (currentQuestion > 0) {
+      animateTransition("prev");
       setCurrentQuestion(currentQuestion - 1);
     }
   };
 
   const goToQuestion = (index: number) => {
+    const direction = index > currentQuestion ? "next" : "prev";
+    animateTransition(direction);
     setCurrentQuestion(index);
   };
 
+  const testBill = {
+    invoice_code: "GZTEST_INVOICE",
+    sender_invoice_no: "1234567",
+    invoice_receiver_code: "terminal",
+    description: "Aylay",
+    sender_branch_code: "SALBAR1",
+    amount: 10,
+    callback_url: "https://bd5492c3ee85.ngrok.io/payments?payment_id=1234567",
+  };
+
+  const checkPaymentStatus = async () => {
+    if (!invoiceId) return;
+
+    try {
+      const res = await axios.post(`${SERVER_URI}/api/bill/check`, {
+        invoiceId,
+      });
+
+      if (res.status !== 200) {
+        throw new Error(res.data?.error || "Төлбөр шалгахад алдаа гарлаа");
+      }
+
+      if (res.data.paid_amount > 0) {
+        setIsPaid(true);
+        Toast.show({
+          type: "success",
+          text1: "Амжилттай",
+          text2: "Төлбөр төлөгдсөн байна.",
+        });
+
+        await handleGpt();
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Анхаар!",
+          text2: "Төлбөр хийгдээгүй байна.",
+        });
+      }
+    } catch {
+      Toast.show({
+        type: "error",
+        text1: "Алдаа",
+        text2: "Төлбөр шалгах үед алдаа гарлаа.",
+      });
+    }
+  };
+
   const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.post(`${SERVER_URI}/api/bill/invoice`, testBill, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (res.status !== 200) {
+        throw new Error(res.data?.error || "Invoice error");
+      }
+
+      const invoiceData = res.data;
+      setInvoiceId(invoiceData.invoice_id);
+
+      router.push({
+        pathname: "/Bank",
+        params: {
+          qrText: invoiceData.qr_text,
+          invoiceId: invoiceData.invoice_id,
+          urls: JSON.stringify(invoiceData.urls),
+        },
+      });
+    } catch {
+      Toast.show({
+        type: "error",
+        text1: "Алдаа",
+        text2: "Invoice үүсгэхэд алдаа гарлаа.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGpt = async () => {
     const message = Object.entries(answers)
       .map(([id, ans]) => {
         const question = questions.find((q) => q.id === Number(id));
@@ -116,7 +164,7 @@ const TravelInterestForm: React.FC = () => {
     setModalVisible(true);
 
     try {
-      const res = await fetch(`${SERVER_URI}/api/chat/`, {
+      const res = await fetch(`${SERVER_URI}/api/chat/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message }),
@@ -136,30 +184,42 @@ const TravelInterestForm: React.FC = () => {
   const question = questions[currentQuestion];
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ flex: 1 }}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={Colors.backgroundColor}
+      />
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.stepText}>
           Асуулт {currentQuestion + 1} / {questions.length}
         </Text>
-        <Text style={styles.questionText}>{question.question}</Text>
-        {question.options.map((opt, idx) => (
-          <TouchableOpacity
-            key={idx}
-            onPress={() => handleSelect(opt)}
-            style={[
-              styles.optionButton,
-              answers[question.id] === opt && styles.selectedOption,
-            ]}
-          >
-            <Text
-              style={{
-                color: answers[question.id] === opt ? "#2e7d32" : "#333",
-              }}
+
+        <Animated.View
+          style={{
+            transform: [{ translateX: animation }],
+          }}
+        >
+          <Text style={styles.questionText}>{question.question}</Text>
+
+          {question.options.map((opt, idx) => (
+            <TouchableOpacity
+              key={idx}
+              onPress={() => handleSelect(opt)}
+              style={[
+                styles.optionButton,
+                answers[question.id] === opt && styles.selectedOption,
+              ]}
             >
-              {opt}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={{
+                  color: answers[question.id] === opt ? "#2e7d32" : "#333",
+                }}
+              >
+                {opt}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </Animated.View>
 
         <View style={styles.progressRow}>
           {questions.map((_, index) => (
@@ -197,7 +257,11 @@ const TravelInterestForm: React.FC = () => {
 
           {Object.keys(answers).length === questions.length ? (
             <TouchableOpacity onPress={handleSubmit} style={styles.navButton}>
-              <Text style={styles.buttonText}>Илгээх</Text>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Илгээх</Text>
+              )}
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
@@ -214,7 +278,17 @@ const TravelInterestForm: React.FC = () => {
           )}
         </View>
 
-      
+        {invoiceId && !isPaid && (
+          <TouchableOpacity
+            onPress={checkPaymentStatus}
+            style={[
+              styles.navButton,
+              { marginTop: 20, backgroundColor: "#0984e3" },
+            ]}
+          >
+            <Text style={styles.buttonText}>Төлбөр шалгах</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
 
       <Modal
@@ -254,7 +328,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: "#fff",
-    marginTop:50
+    marginTop: 50,
   },
   stepText: {
     fontSize: 16,
@@ -302,7 +376,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     marginBottom: 20,
-    flex: 1,
     justifyContent: "space-between",
   },
   stepCircle: {
@@ -312,6 +385,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#eee",
     justifyContent: "center",
     alignItems: "center",
+    margin: 2,
   },
   activeStep: {
     backgroundColor: Colors.primaryColor,

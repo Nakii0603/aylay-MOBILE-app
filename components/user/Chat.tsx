@@ -7,6 +7,7 @@ import {
   Platform,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -32,7 +33,7 @@ export default function Chat() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${SERVER_URI}/api/chatMessage/`, {
+      const res = await fetch(`${SERVER_URI}/api/chat/chatMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: trimmedInput }),
@@ -59,6 +60,10 @@ export default function Chat() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={Colors.backgroundColor}
+      />
       <KeyboardAvoidingView
         style={styles.innerContainer}
         behavior={Platform.OS === "ios" ? "padding" : undefined}

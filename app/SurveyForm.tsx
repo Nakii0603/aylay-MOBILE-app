@@ -1,11 +1,13 @@
+import BackNav from "@/components/user/BackNav";
 import Colors from "@/constants/Colors";
 import { allSurveys, result } from "@/constants/Data";
-import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
   Modal,
+  SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -55,7 +57,6 @@ type ResultMap = {
 
 export default function SurveyForm() {
   const { surveyId } = useLocalSearchParams<{ surveyId?: string }>();
-  const router = useRouter();
 
   const selectedSurvey: Survey | undefined = allSurveys.find(
     (survey) => survey.id.toString() === surveyId
@@ -153,83 +154,87 @@ export default function SurveyForm() {
   }
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={router.back} style={styles.backButton}>
-        <Ionicons name="arrow-back" size={24} color={Colors.black} />
-      </TouchableOpacity>
-      <Text style={styles.title}>{selectedSurvey.section}</Text>
-      <Text style={styles.questionCounter}>
-        Асуулт {currentIndex + 1} / {questions.length}
-      </Text>
-      <Text style={styles.questionText}>{currentQuestion.question}</Text>
+    <SafeAreaView style={{ backgroundColor: "#fff", height: "100%" }}>
+      <BackNav />
+      <ScrollView style={styles.container}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={Colors.backgroundColor}
+        />
+        <Text style={styles.title}>{selectedSurvey.section}</Text>
+        <Text style={styles.questionCounter}>
+          Асуулт {currentIndex + 1} / {questions.length}
+        </Text>
+        <Text style={styles.questionText}>{currentQuestion.question}</Text>
 
-      <ScrollView style={{ marginVertical: 20, maxHeight: 250 }}>
-        {currentQuestion.answers.map((option, idx) => {
-          const selected = answers[currentIndex] === idx;
-          return (
-            <TouchableOpacity
-              key={idx}
-              style={[styles.optionButton, selected && styles.selectedOption]}
-              onPress={() => selectOption(idx)}
-            >
-              <Text
-                style={[
-                  styles.optionText,
-                  selected && styles.selectedOptionText,
-                ]}
+        <ScrollView style={{ marginVertical: 20, maxHeight: 250 }}>
+          {currentQuestion.answers.map((option, idx) => {
+            const selected = answers[currentIndex] === idx;
+            return (
+              <TouchableOpacity
+                key={idx}
+                style={[styles.optionButton, selected && styles.selectedOption]}
+                onPress={() => selectOption(idx)}
               >
-                {option.text}
+                <Text
+                  style={[
+                    styles.optionText,
+                    selected && styles.selectedOptionText,
+                  ]}
+                >
+                  {option.text}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        <View style={styles.buttonRow}>
+          {currentIndex > 0 && (
+            <View style={{ flex: 1, alignItems: "flex-start" }}>
+              <TouchableOpacity onPress={handleBack} style={styles.navButton}>
+                <Text style={styles.navButtonText}>Өмнөх</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          <View style={{ flex: 1, alignItems: "flex-end" }}>
+            <TouchableOpacity
+              onPress={handleNext}
+              style={[
+                styles.navButton,
+                answers[currentIndex] === null && styles.disabledButton,
+              ]}
+              disabled={answers[currentIndex] === null}
+            >
+              <Text style={styles.navButtonText}>
+                {currentIndex === questions.length - 1 ? "Дуусгах" : "Дараах"}
               </Text>
             </TouchableOpacity>
-          );
-        })}
+          </View>
+        </View>
+
+        <Modal
+          visible={showResult}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setShowResult(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>🎉 Таны Дүгнэлт</Text>
+              <Text style={styles.resultText}>{getConclusion()}</Text>
+              <Text style={styles.note}>Нийт оноо: {totalScore}</Text>
+              <TouchableOpacity
+                onPress={() => setShowResult(false)}
+                style={[styles.navButton, { marginTop: 20 }]}
+              >
+                <Text style={styles.navButtonText}>Хаах</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
-
-      <View style={styles.buttonRow}>
-        {currentIndex > 0 && (
-          <View style={{ flex: 1, alignItems: "flex-start" }}>
-            <TouchableOpacity onPress={handleBack} style={styles.navButton}>
-              <Text style={styles.navButtonText}>Өмнөх</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        <View style={{ flex: 1, alignItems: "flex-end" }}>
-          <TouchableOpacity
-            onPress={handleNext}
-            style={[
-              styles.navButton,
-              answers[currentIndex] === null && styles.disabledButton,
-            ]}
-            disabled={answers[currentIndex] === null}
-          >
-            <Text style={styles.navButtonText}>
-              {currentIndex === questions.length - 1 ? "Дуусгах" : "Дараах"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <Modal
-        visible={showResult}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowResult(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>🎉 Таны Дүгнэлт</Text>
-            <Text style={styles.resultText}>{getConclusion()}</Text>
-            <Text style={styles.note}>Нийт оноо: {totalScore}</Text>
-            <TouchableOpacity
-              onPress={() => setShowResult(false)}
-              style={[styles.navButton, { marginTop: 20 }]}
-            >
-              <Text style={styles.navButtonText}>Хаах</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -237,14 +242,8 @@ export default function SurveyForm() {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingTop: 50,
     flex: 1,
     backgroundColor: "#fff",
-  },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
   },
   title: {
     fontSize: 22,

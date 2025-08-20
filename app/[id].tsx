@@ -1,21 +1,22 @@
+import BackNav from "@/components/user/BackNav";
+import Colors from "@/constants/Colors";
 import { aimags } from "@/constants/Data";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
-  Button,
   Dimensions,
   FlatList,
   Image,
+  SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function AimagDetail() {
-  const router = useRouter();
   const { id } = useLocalSearchParams();
   const aimagId = Number(id);
   const aimag = aimags.find((a) => a.id === aimagId);
@@ -30,128 +31,117 @@ export default function AimagDetail() {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   return (
-    <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-        <ScrollView>
-          {/* HEADER IMAGE */}
-          {aimag?.image ? (
+    <SafeAreaView style={{ backgroundColor: "#fff", height: "100%" }}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={Colors.backgroundColor}
+      />
+      <BackNav />
+      <ScrollView style={styles.container}>
+        {aimag?.image ? (
+          <Image
+            source={aimag.image}
+            style={{ width: "100%", height: headerImageHeight }}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={styles.noImage}>
+            <Text>No Image</Text>
+          </View>
+        )}
+
+        <View style={{ padding: 16 }}>
+          <View style={styles.titleRow}>
+            <Text style={styles.title}>{aimag?.name}</Text>
             <Image
-              source={aimag.image}
-              style={{ width: "100%", height: headerImageHeight }}
-              resizeMode="cover"
-            />
-          ) : (
-            <View style={styles.noImage}>
-              <Text>No Image</Text>
-            </View>
-          )}
-
-          <View style={styles.container}>
-            {/* TITLE + COAT */}
-            <View style={styles.titleRow}>
-              <Text style={styles.title}>{aimag?.name}</Text>
-              <Image
-                source={require("@/assets/icons/coat.png")}
-                style={styles.coat}
-              />
-            </View>
-
-            {/* ТОВЧ ТАНИЛЦУУЛГА */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Ionicons name="information-circle" size={18} color="#555" />
-                <Text style={styles.sectionTitle}>Товч танилцуулга</Text>
-              </View>
-              <Text style={styles.description}>{aimag?.description}</Text>
-            </View>
-
-            {/* СТАТИСТИК */}
-            <View style={styles.statsContainer}>
-              <View style={styles.statBox}>
-                <Text style={styles.statLabel}>Хүн амын тоо</Text>
-                <Text style={styles.statValue}>
-                  {aimag?.population?.toLocaleString() || "?"}
-                </Text>
-              </View>
-              <View style={styles.statBox}>
-                <Text style={styles.statLabel}>Сумын тоо</Text>
-                <Text style={styles.statValue}>{aimag?.sum}</Text>
-              </View>
-              <View style={styles.statBox}>
-                <Text style={styles.statLabel}>Нийт талбай</Text>
-                <Text style={styles.statValue}>{aimag?.area}</Text>
-              </View>
-              <View style={styles.statBox}>
-                <Text style={styles.statLabel}>Онцлог</Text>
-                <Text style={styles.statValue}>{aimag?.features}</Text>
-              </View>
-            </View>
-
-            {/* ҮЗЭСГЭЛЭНТ ГАЗРУУД */}
-            <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
-              Үзэсгэлэнт газрууд
-            </Text>
-
-            <FlatList
-              data={aimag?.naturalSites}
-              keyExtractor={(item, index) => index.toString()}
-              numColumns={2}
-              columnWrapperStyle={{ justifyContent: "space-between" }}
-              scrollEnabled={false}
-              renderItem={({ item, index }) => (
-                <View style={[styles.card, { width: cardWidth }]}>
-                  <Image
-                    source={{ uri: item.image }}
-                    style={styles.cardImage}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.cardContent}>
-                    <Text style={styles.cardTitle}>{item.name}</Text>
-                    <Text
-                      style={styles.cardDescription}
-                      numberOfLines={expandedIndex === index ? undefined : 3}
-                    >
-                      {item.description || "Тайлбар байхгүй."}
-                    </Text>
-
-                    {item.description && item.description.length > 50 && (
-                      <Text
-                        onPress={() =>
-                          setExpandedIndex(
-                            expandedIndex === index ? null : index
-                          )
-                        }
-                        style={styles.readMore}
-                      >
-                        {expandedIndex === index
-                          ? "Хураах"
-                          : "Дэлгэрэнгүй унших"}
-                      </Text>
-                    )}
-                  </View>
-                </View>
-              )}
-              ListEmptyComponent={
-                <Text style={{ fontStyle: "italic", marginTop: 10 }}>
-                  Үзэсгэлэнт газар алга.
-                </Text>
-              }
+              source={require("@/assets/icons/coat.png")}
+              style={styles.coat}
             />
           </View>
-        </ScrollView>
 
-        <View style={styles.backButtonContainer}>
-          <Button title="← Буцах" onPress={() => router.back()} />
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="information-circle" size={18} color="#555" />
+              <Text style={styles.sectionTitle}>Товч танилцуулга</Text>
+            </View>
+            <Text style={styles.description}>{aimag?.description}</Text>
+          </View>
+
+          <View style={styles.statsContainer}>
+            <View style={styles.statBox}>
+              <Text style={styles.statLabel}>Хүн амын тоо</Text>
+              <Text style={styles.statValue}>
+                {aimag?.population?.toLocaleString() || "?"}
+              </Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statLabel}>Сумын тоо</Text>
+              <Text style={styles.statValue}>{aimag?.sum}</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statLabel}>Нийт талбай</Text>
+              <Text style={styles.statValue}>{aimag?.area}</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statLabel}>Онцлог</Text>
+              <Text style={styles.statValue}>{aimag?.features}</Text>
+            </View>
+          </View>
+
+          <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
+            Үзэсгэлэнт газрууд
+          </Text>
+
+          <FlatList
+            data={aimag?.naturalSites}
+            keyExtractor={(item, index) => index.toString()}
+            numColumns={2}
+            columnWrapperStyle={{ justifyContent: "space-between" }}
+            scrollEnabled={false}
+            renderItem={({ item, index }) => (
+              <View style={[styles.card, { width: cardWidth }]}>
+                <Image
+                  source={{ uri: item.image }}
+                  style={styles.cardImage}
+                  resizeMode="cover"
+                />
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>{item.name}</Text>
+                  <Text
+                    style={styles.cardDescription}
+                    numberOfLines={expandedIndex === index ? undefined : 3}
+                  >
+                    {item.description || "Тайлбар байхгүй."}
+                  </Text>
+
+                  {item.description && item.description.length > 50 && (
+                    <Text
+                      onPress={() =>
+                        setExpandedIndex(expandedIndex === index ? null : index)
+                      }
+                      style={styles.readMore}
+                    >
+                      {expandedIndex === index ? "Хураах" : "Дэлгэрэнгүй унших"}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            )}
+            ListEmptyComponent={
+              <Text style={{ fontStyle: "italic", marginTop: 10 }}>
+                Үзэсгэлэнт газар алга.
+              </Text>
+            }
+          />
         </View>
-      </SafeAreaView>
-    </>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    flex: 1,
   },
   titleRow: {
     flexDirection: "row",
@@ -237,12 +227,6 @@ const styles = StyleSheet.create({
     color: "#007AFF",
     marginTop: 4,
     fontSize: 13,
-  },
-  backButtonContainer: {
-    position: "absolute",
-    top: 40,
-    left: 15,
-    zIndex: 10,
   },
   noImage: {
     width: "100%",

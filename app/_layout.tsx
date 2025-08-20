@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { TouchableOpacity } from "react-native";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 export default function RootLayout() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
+      <Toast />
       <Stack
         screenOptions={{
           headerTitleAlign: "center",
@@ -96,6 +98,21 @@ export default function RootLayout() {
         />
         <Stack.Screen
           name="SurveyForm"
+          options={{
+            headerTitle: "",
+            headerShadowVisible: false,
+            headerLeft: () => (
+              <TouchableOpacity
+                onPress={() => router.back()}
+                style={{ paddingHorizontal: 15 }}
+              >
+                <AntDesign name="arrowleft" size={24} color="black" />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+        <Stack.Screen
+          name="Bank"
           options={{
             headerTitle: "",
             headerShadowVisible: false,

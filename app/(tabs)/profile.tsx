@@ -231,11 +231,6 @@ const styles = StyleSheet.create({
     color: Colors.black,
     fontWeight: "600",
   },
-  menuItemLogoutText: {
-    fontSize: 16,
-    color: Colors.red,
-    fontWeight: "600",
-  },
   backgroundImage: {
     position: "absolute",
     width: 600,
