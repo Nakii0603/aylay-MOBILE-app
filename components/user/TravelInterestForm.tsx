@@ -1,11 +1,11 @@
+import Colors from "@/constants/Colors";
 import { questions } from "@/constants/Data";
 import { SERVER_URI } from "@/utils/uri";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
-  Animated,
   Dimensions,
   Modal,
   SafeAreaView,
@@ -19,7 +19,6 @@ import {
 import Toast from "react-native-toast-message";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-
 const PRIMARY = "#013632";
 
 const TravelInterestForm: React.FC = () => {
@@ -34,41 +33,24 @@ const TravelInterestForm: React.FC = () => {
   const [isPaid, setIsPaid] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
 
-  // Animation value for slide
-  const animation = useRef(new Animated.Value(0)).current;
-
-  // Animate slide from left or right
-  const animateTransition = (direction: "next" | "prev") => {
-    animation.setValue(direction === "next" ? SCREEN_WIDTH : -SCREEN_WIDTH);
-    Animated.timing(animation, {
-      toValue: 0,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  };
-
+  // --- OPTION ДАРААД ДАРААГИЙН АСУУЛТ РУУ ШУУД ШИЛЖИНЭ ---
   const handleSelect = (option: string) => {
-    const questionId = questions[currentQuestion].id;
-    setAnswers({ ...answers, [questionId]: option });
-  };
-
-  const next = () => {
-    if (currentQuestion < questions.length - 1) {
-      animateTransition("next");
-      setCurrentQuestion(currentQuestion + 1);
-    }
+    const q = questions[currentQuestion];
+    setAnswers((prev) => {
+      const next = { ...prev, [q.id]: option };
+      // Дараагийн асуулт руу автоматаар
+      if (currentQuestion < questions.length - 1) {
+        setCurrentQuestion((s) => s + 1);
+      }
+      return next;
+    });
   };
 
   const prev = () => {
-    if (currentQuestion > 0) {
-      animateTransition("prev");
-      setCurrentQuestion(currentQuestion - 1);
-    }
+    if (currentQuestion > 0) setCurrentQuestion((s) => s - 1);
   };
 
   const goToQuestion = (index: number) => {
-    const direction = index > currentQuestion ? "next" : "prev";
-    animateTransition(direction);
     setCurrentQuestion(index);
   };
 
@@ -89,10 +71,8 @@ const TravelInterestForm: React.FC = () => {
       const res = await axios.post(`${SERVER_URI}/api/bill/check`, {
         invoiceId,
       });
-
-      if (res.status !== 200) {
+      if (res.status !== 200)
         throw new Error(res.data?.error || "Төлбөр шалгахад алдаа гарлаа");
-      }
 
       if (res.data.paid_amount > 0) {
         setIsPaid(true);
@@ -122,14 +102,11 @@ const TravelInterestForm: React.FC = () => {
     setLoading(true);
     try {
       const res = await axios.post(`${SERVER_URI}/api/bill/invoice`, testBill, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
 
-      if (res.status !== 200) {
+      if (res.status !== 200)
         throw new Error(res.data?.error || "Invoice error");
-      }
 
       const invoiceData = res.data;
       setInvoiceId(invoiceData.invoice_id);
@@ -181,7 +158,6 @@ const TravelInterestForm: React.FC = () => {
     }
   };
 
-  // Share to /api/trip/createTrip
   const handleShareTrip = async () => {
     if (!chatResponse?.trim()) {
       Toast.show({
@@ -221,7 +197,6 @@ const TravelInterestForm: React.FC = () => {
         text1: "Амжилттай хуваалцлаа",
         text2: "Таны маршрут хадгалагдлаа.",
       });
-
       setModalVisible(false);
     } catch (e: any) {
       Toast.show({
@@ -235,6 +210,7 @@ const TravelInterestForm: React.FC = () => {
   };
 
   const question = questions[currentQuestion];
+  const allAnswered = Object.keys(answers).length === questions.length;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -244,7 +220,8 @@ const TravelInterestForm: React.FC = () => {
           Асуулт {currentQuestion + 1} / {questions.length}
         </Text>
 
-        <Animated.View style={{ transform: [{ translateX: animation }] }}>
+        {/* ANIMATION АШИГЛАХГҮЙ, ЕРДИЙН VIEW */}
+        <View>
           <Text style={styles.questionText}>{question.question}</Text>
 
           {question.options.map((opt, idx) => (
@@ -265,7 +242,7 @@ const TravelInterestForm: React.FC = () => {
               </Text>
             </TouchableOpacity>
           ))}
-        </Animated.View>
+        </View>
 
         <View style={styles.progressRow}>
           {questions.map((_, index) => (
@@ -289,6 +266,7 @@ const TravelInterestForm: React.FC = () => {
           ))}
         </View>
 
+        {/* ДАРААХ товчийг устгасан. Зөвхөн Өмнөх + Дуусгах (бүгд бөглөгдвөл) */}
         <View style={styles.buttonRow}>
           <TouchableOpacity
             onPress={prev}
@@ -301,25 +279,13 @@ const TravelInterestForm: React.FC = () => {
             <Text style={styles.buttonText}>Өмнөх</Text>
           </TouchableOpacity>
 
-          {Object.keys(answers).length === questions.length ? (
+          {allAnswered && (
             <TouchableOpacity onPress={handleSubmit} style={styles.navButton}>
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>Илгээх</Text>
+                <Text style={styles.buttonText}>Дуусгах</Text>
               )}
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              onPress={next}
-              disabled={currentQuestion === questions.length - 1}
-              style={[
-                styles.navButton,
-                currentQuestion === questions.length - 1 &&
-                  styles.disabledButton,
-              ]}
-            >
-              <Text style={styles.buttonText}>Дараах</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -327,12 +293,9 @@ const TravelInterestForm: React.FC = () => {
         {invoiceId && !isPaid && (
           <TouchableOpacity
             onPress={checkPaymentStatus}
-            style={[
-              styles.navButton,
-              { marginTop: 20, backgroundColor: "#0984e3" },
-            ]}
+            style={[styles.payBtn]}
           >
-            <Text style={styles.buttonText}>Төлбөр шалгах</Text>
+            <Text style={styles.payBtnText}>Төлбөр шалгах</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -359,7 +322,10 @@ const TravelInterestForm: React.FC = () => {
                     <TouchableOpacity
                       onPress={handleShareTrip}
                       disabled={shareLoading}
-                      style={[styles.actionBtn, { backgroundColor: "#10b981" }]}
+                      style={[
+                        styles.actionBtn,
+                        { backgroundColor: Colors.primaryColor },
+                      ]}
                     >
                       {shareLoading ? (
                         <ActivityIndicator color="#fff" />
@@ -369,7 +335,6 @@ const TravelInterestForm: React.FC = () => {
                         </Text>
                       )}
                     </TouchableOpacity>
-
                     <TouchableOpacity
                       onPress={() => setModalVisible(false)}
                       style={[styles.actionBtn, { backgroundColor: "#6b7280" }]}
@@ -401,68 +366,95 @@ const TravelInterestForm: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: "#fff",
-    marginTop: 50,
+    flexGrow: 1,
   },
+
   stepText: {
-    fontSize: 16,
-    marginBottom: 10,
-    fontWeight: "500",
-    color: "#888",
+    fontSize: 15,
+    marginBottom: 12,
+    fontWeight: "600",
+    color: "#647067",
   },
+
   questionText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 16,
+    fontSize: 20,
+    fontWeight: "800",
+    marginBottom: 18,
+    color: "#0F2E23",
   },
+
   optionButton: {
-    padding: 12,
-    borderRadius: 10,
+    padding: 14,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#ccc",
-    marginBottom: 10,
+    borderColor: "#D9E2DD",
+    marginBottom: 12,
     backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
   },
   selectedOption: {
     backgroundColor: "#E8F5E9",
-    borderColor: PRIMARY,
+    borderColor: "#008000",
   },
+
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
+    marginTop: 24,
+    gap: 12,
   },
+
   navButton: {
-    padding: 12,
+    flex: 1,
+    paddingVertical: 14,
     backgroundColor: PRIMARY,
-    borderRadius: 8,
-    minWidth: 100,
+    borderRadius: 14,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.07,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 3 },
   },
-  disabledButton: {
-    backgroundColor: "#ccc",
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+  disabledButton: { backgroundColor: "#ccc" },
+  buttonText: { color: "#fff", fontWeight: "700", fontSize: 15, padding: 2 },
+
   progressRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    marginBottom: 20,
+    flexWrap: "nowrap", // ⬅️ wrap хийхгүй
     justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    marginTop: 18,
+    marginBottom: 20,
+    paddingHorizontal: 6, // бага зэрэг зай
   },
   stepCircle: {
-    width: 30,
-    height: 30,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: "#eee",
     justifyContent: "center",
     alignItems: "center",
-    margin: 2,
+    marginHorizontal: 3, // gap оронд cross-version найдвартай
   },
-  activeStep: {
-    backgroundColor: PRIMARY,
+  activeStep: { backgroundColor: PRIMARY },
+  payBtn: {
+    backgroundColor: "#0984e3",
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    alignSelf: "center", // томроод 100% дүүргэхээс сэргийлнэ
+    marginTop: 16,
+  },
+  payBtnText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 15,
   },
   modalBackground: {
     flex: 1,
@@ -473,35 +465,35 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: "#fff",
     padding: 20,
-    borderRadius: 12,
+    borderRadius: 18,
     maxHeight: "80%",
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 19,
+    fontWeight: "800",
     marginBottom: 12,
+    color: PRIMARY,
+    textAlign: "center",
   },
-  modalText: {
-    fontSize: 16,
-    color: "#333",
-  },
+  modalText: { fontSize: 15, color: "#2F4F4F", lineHeight: 22 },
+
   closeButton: {
     marginTop: 20,
-    padding: 12,
+    paddingVertical: 14,
     backgroundColor: PRIMARY,
-    borderRadius: 10,
+    borderRadius: 14,
     alignItems: "center",
   },
   actionRow: {
-    marginTop: 16,
+    marginTop: 20,
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 12,
   },
   actionBtn: {
     flex: 1,
-    padding: 12,
-    borderRadius: 10,
+    paddingVertical: 14,
+    borderRadius: 14,
     alignItems: "center",
   },
 });

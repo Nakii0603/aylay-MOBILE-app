@@ -20,7 +20,6 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <Toast />
       <Stack
         screenOptions={{
           headerTitleAlign: "center",
@@ -145,6 +144,7 @@ export default function RootLayout() {
 
         <Stack.Screen name="+not-found" />
       </Stack>
+      <Toast position="top" topOffset={50} />
       <StatusBar style="auto" />
     </SafeAreaProvider>
   );

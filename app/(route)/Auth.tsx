@@ -1,7 +1,7 @@
-import Colors from "@/constants/Colors";
 import { SERVER_URI } from "@/utils/uri";
-// import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { Href, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -15,8 +15,12 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
+const PRIMARY = "#013632";
+
 const AuthScreen: React.FC = () => {
-  //   const navigation = useNavigation();
+  const router = useRouter();
+  const { redirect } = useLocalSearchParams<{ redirect?: string }>();
+
   const [isLoginView, setIsLoginView] = useState(true);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -52,8 +56,6 @@ const AuthScreen: React.FC = () => {
         const res = await axios.post(`${SERVER_URI}/api/otp/send-otp`, {
           email: formData.email,
         });
-        console.log(res.data);
-
         if (res.data.message === "OTP sent successfully to your email") {
           Toast.show({ type: "success", text1: "OTP имэйл рүү илгээгдлээ" });
           setOtpSent(true);
@@ -66,7 +68,6 @@ const AuthScreen: React.FC = () => {
           email: formData.email,
           otp: formData.otp,
         });
-
         if (res.data.message === "OTP verified successfully") {
           Toast.show({ type: "success", text1: "OTP баталгаажлаа" });
           setStep(3);
@@ -92,8 +93,11 @@ const AuthScreen: React.FC = () => {
         });
 
         if (res.data.message === "User registered successfully") {
-          Toast.show({ type: "success", text1: "Бүртгэл амжилттай!" });
-          handleToggle(); // switch to login
+          Toast.show({
+            type: "success",
+            text1: "Бүртгэл амжилттай! Нэвтэрнэ үү.",
+          });
+          handleToggle(); // Login харагдуулна
         } else {
           Toast.show({ type: "error", text1: "Имэйл бүртгэлтэй байна" });
         }
@@ -107,7 +111,6 @@ const AuthScreen: React.FC = () => {
 
   const handleLogin = async () => {
     const { email, password } = loginData;
-
     if (!email || !password) {
       Toast.show({ type: "error", text1: "Бүх талбарыг бөглөнө үү" });
       return;
@@ -119,14 +122,29 @@ const AuthScreen: React.FC = () => {
         email,
         password,
       });
-      console.log(res.data);
 
-      const { message, token } = res.data;
+      // Backend өгөгдөл:
+      // { message: "Login successful", token: "<jwt>", user: { email, phoneNumber, userId } }
+      const { message, token, user } = res.data || {};
+      const userIdFromApi: string | undefined = user?.userId;
 
-      if (message === "Login successful" && token) {
+      if (message === "Login successful" && token && userIdFromApi) {
+        await AsyncStorage.multiSet([
+          ["token", token],
+          ["userId", userIdFromApi],
+          ["email", user?.email ?? ""],
+        ]);
+
+        // (сонголттой) axios default auth header
+        axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+
         Toast.show({ type: "success", text1: "Амжилттай нэвтэрлээ" });
-        // Save token
-        // navigation.navigate("Dashboard" as never);
+
+        // redirect байвал тийш, үгүй бол /travel
+        router.push({
+          pathname: "/travel",
+          params: { redirect: "/travel" },
+        } as Href);
       } else {
         Toast.show({ type: "error", text1: "Имэйл эсвэл нууц үг буруу байна" });
       }
@@ -145,12 +163,7 @@ const AuthScreen: React.FC = () => {
       <Toast />
       <Image
         source={require("@/assets/images/image2.png")}
-        style={{
-          width: 150,
-          height: 120,
-          justifyContent: "center",
-          alignSelf: "center",
-        }}
+        style={{ width: 150, height: 120, alignSelf: "center" }}
         resizeMode="contain"
       />
 
@@ -160,22 +173,20 @@ const AuthScreen: React.FC = () => {
         <>
           <TextInput
             placeholder="Имэйл хаяг"
-            placeholderTextColor="rgba(0, 0, 0, 0.5)"
+            placeholderTextColor="rgba(0,0,0,0.5)"
             autoCapitalize="none"
             value={loginData.email}
-            onChangeText={(val) =>
-              setLoginData((prev) => ({ ...prev, email: val }))
-            }
+            onChangeText={(val) => setLoginData((p) => ({ ...p, email: val }))}
             style={styles.input}
           />
           <TextInput
             placeholder="Нууц үг"
-            placeholderTextColor="rgba(0, 0, 0, 0.5)"
+            placeholderTextColor="rgba(0,0,0,0.5)"
             autoCapitalize="none"
             secureTextEntry
             value={loginData.password}
             onChangeText={(val) =>
-              setLoginData((prev) => ({ ...prev, password: val }))
+              setLoginData((p) => ({ ...p, password: val }))
             }
             style={styles.input}
           />
@@ -189,7 +200,7 @@ const AuthScreen: React.FC = () => {
             <>
               <TextInput
                 placeholder="Имэйл хаяг"
-                placeholderTextColor="rgba(0, 0, 0, 0.5)"
+                placeholderTextColor="rgba(0,0,0,0.5)"
                 autoCapitalize="none"
                 value={formData.email}
                 onChangeText={(val) => handleOnChange("email", val)}
@@ -204,7 +215,7 @@ const AuthScreen: React.FC = () => {
             <>
               <TextInput
                 placeholder="OTP код"
-                placeholderTextColor="rgba(0, 0, 0, 0.5)"
+                placeholderTextColor="rgba(0,0,0,0.5)"
                 autoCapitalize="none"
                 value={formData.otp}
                 onChangeText={(val) => handleOnChange("otp", val)}
@@ -219,7 +230,7 @@ const AuthScreen: React.FC = () => {
             <>
               <TextInput
                 placeholder="Нууц үг"
-                placeholderTextColor="rgba(0, 0, 0, 0.5)"
+                placeholderTextColor="rgba(0,0,0,0.5)"
                 autoCapitalize="none"
                 secureTextEntry
                 value={formData.password}
@@ -228,7 +239,7 @@ const AuthScreen: React.FC = () => {
               />
               <TextInput
                 placeholder="Нууц үг давтах"
-                placeholderTextColor="rgba(0, 0, 0, 0.5)"
+                placeholderTextColor="rgba(0,0,0,0.5)"
                 autoCapitalize="none"
                 secureTextEntry
                 value={formData.repassword}
@@ -281,19 +292,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   button: {
-    backgroundColor: Colors.primaryColor,
+    backgroundColor: PRIMARY,
     paddingVertical: 14,
     borderRadius: 6,
     alignItems: "center",
     marginBottom: 12,
   },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-  toggleText: {
-    color: Colors.primaryColor,
-    textAlign: "center",
-    marginTop: 12,
-  },
+  buttonText: { color: "#fff", fontWeight: "600" },
+  toggleText: { color: PRIMARY, textAlign: "center", marginTop: 12 },
 });

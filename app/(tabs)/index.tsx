@@ -9,6 +9,7 @@ import {
   Image,
   Modal,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -68,6 +69,10 @@ export default function Home() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#eafff3" }}>
       <View style={styles.container}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={Colors.backgroundColor}
+        />
         {/* Carousel */}
         <ScrollView
           ref={scrollRef}
