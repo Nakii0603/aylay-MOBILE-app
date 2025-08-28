@@ -65,6 +65,22 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
+          name="(route)/Auth"
+          options={{
+            headerTitle: "",
+            headerShadowVisible: false,
+            headerShown: false,
+            headerLeft: () => (
+              <TouchableOpacity
+                onPress={() => router.back()}
+                style={{ paddingHorizontal: 15 }}
+              >
+                <AntDesign name="arrowleft" size={24} color="black" />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+        <Stack.Screen
           name="(route)/InfoNot"
           options={{
             headerTitle: "",

@@ -56,6 +56,9 @@ export default function ProfileScreen() {
   const handleUserInfoNotScreen = () => {
     router.push("/(route)/UserInfo");
   };
+  const handleAuth = () => {
+    router.push("/(route)/Auth");
+  };
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar
@@ -125,6 +128,16 @@ export default function ProfileScreen() {
                 style={{ width: 30, height: 30 }}
               />
               <Text style={styles.menuItemText}>Үйлчилгээний нөхцөл</Text>
+            </View>
+            <AntDesign name="right" size={20} color={Colors.primaryColor} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem} onPress={handleAuth}>
+            <View style={styles.menuItemContent}>
+              <Image
+                source={require("@/assets/icons/profTermMenu.png")}
+                style={{ width: 30, height: 30 }}
+              />
+              <Text style={styles.menuItemText}>Нэвтрэх</Text>
             </View>
             <AntDesign name="right" size={20} color={Colors.primaryColor} />
           </TouchableOpacity>

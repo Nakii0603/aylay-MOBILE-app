@@ -1,4 +1,3 @@
-import Colors from "@/constants/Colors";
 import { questions } from "@/constants/Data";
 import { SERVER_URI } from "@/utils/uri";
 import axios from "axios";
@@ -21,6 +20,8 @@ import Toast from "react-native-toast-message";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
+const PRIMARY = "#013632";
+
 const TravelInterestForm: React.FC = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -31,6 +32,7 @@ const TravelInterestForm: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [chatResponse, setChatResponse] = useState("");
   const [isPaid, setIsPaid] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
 
   // Animation value for slide
   const animation = useRef(new Animated.Value(0)).current;
@@ -75,7 +77,7 @@ const TravelInterestForm: React.FC = () => {
     sender_invoice_no: "1234567",
     invoice_receiver_code: "terminal",
     description: "Aylay",
-    sender_branch_code: "SALBAR1",
+    sender_branch_code: "Aylay",
     amount: 10,
     callback_url: "https://bd5492c3ee85.ngrok.io/payments?payment_id=1234567",
   };
@@ -99,7 +101,6 @@ const TravelInterestForm: React.FC = () => {
           text1: "Амжилттай",
           text2: "Төлбөр төлөгдсөн байна.",
         });
-
         await handleGpt();
       } else {
         Toast.show({
@@ -108,7 +109,7 @@ const TravelInterestForm: React.FC = () => {
           text2: "Төлбөр хийгдээгүй байна.",
         });
       }
-    } catch {
+    } catch (e) {
       Toast.show({
         type: "error",
         text1: "Алдаа",
@@ -174,31 +175,76 @@ const TravelInterestForm: React.FC = () => {
       const data = await res.json();
       setChatResponse(data.reply);
     } catch (error) {
-      console.error("Error sending to GPT:", error);
       setChatResponse("Алдаа гарлаа. Дахин оролдоно уу.");
     } finally {
       setLoading(false);
     }
   };
 
+  // Share to /api/trip/createTrip
+  const handleShareTrip = async () => {
+    if (!chatResponse?.trim()) {
+      Toast.show({
+        type: "error",
+        text1: "Мэдээлэл алга",
+        text2: "Маршрут хоосон байна.",
+      });
+      return;
+    }
+
+    const firstLine = chatResponse.split("\n").find((l) => l.trim().length > 0);
+    const title =
+      (firstLine && firstLine.replace(/[#*-]/g, "").trim().slice(0, 80)) ||
+      "Миний аяллын маршрут";
+
+    const creator =
+      (typeof params.userId === "string" && params.userId) ||
+      "ec45b335-f25e-46fe-b769-1b8d832d60db";
+
+    const payload = { title, text: chatResponse, creator };
+
+    try {
+      setShareLoading(true);
+      const res = await fetch(`${SERVER_URI}/api/trip/createTrip`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const msg = await res.text().catch(() => "");
+        throw new Error(msg || `HTTP ${res.status}`);
+      }
+
+      Toast.show({
+        type: "success",
+        text1: "Амжилттай хуваалцлаа",
+        text2: "Таны маршрут хадгалагдлаа.",
+      });
+
+      setModalVisible(false);
+    } catch (e: any) {
+      Toast.show({
+        type: "error",
+        text1: "Хуваалцахад алдаа",
+        text2: e?.message || "Дахин оролдоно уу.",
+      });
+    } finally {
+      setShareLoading(false);
+    }
+  };
+
   const question = questions[currentQuestion];
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor={Colors.backgroundColor}
-      />
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.stepText}>
           Асуулт {currentQuestion + 1} / {questions.length}
         </Text>
 
-        <Animated.View
-          style={{
-            transform: [{ translateX: animation }],
-          }}
-        >
+        <Animated.View style={{ transform: [{ translateX: animation }] }}>
           <Text style={styles.questionText}>{question.question}</Text>
 
           {question.options.map((opt, idx) => (
@@ -307,14 +353,42 @@ const TravelInterestForm: React.FC = () => {
                 <ScrollView>
                   <Text style={styles.modalText}>{chatResponse}</Text>
                 </ScrollView>
-                <TouchableOpacity
-                  onPress={() => setModalVisible(false)}
-                  style={styles.closeButton}
-                >
-                  <Text style={{ color: "#fff", fontWeight: "bold" }}>
-                    Хаах
-                  </Text>
-                </TouchableOpacity>
+
+                {isPaid ? (
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity
+                      onPress={handleShareTrip}
+                      disabled={shareLoading}
+                      style={[styles.actionBtn, { backgroundColor: "#10b981" }]}
+                    >
+                      {shareLoading ? (
+                        <ActivityIndicator color="#fff" />
+                      ) : (
+                        <Text style={{ color: "#fff", fontWeight: "bold" }}>
+                          Хуваалцах
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={() => setModalVisible(false)}
+                      style={[styles.actionBtn, { backgroundColor: "#6b7280" }]}
+                    >
+                      <Text style={{ color: "#fff", fontWeight: "bold" }}>
+                        Хаах
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    onPress={() => setModalVisible(false)}
+                    style={styles.closeButton}
+                  >
+                    <Text style={{ color: "#fff", fontWeight: "bold" }}>
+                      Хаах
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </>
             )}
           </View>
@@ -351,7 +425,7 @@ const styles = StyleSheet.create({
   },
   selectedOption: {
     backgroundColor: "#E8F5E9",
-    borderColor: Colors.primaryColor,
+    borderColor: PRIMARY,
   },
   buttonRow: {
     flexDirection: "row",
@@ -360,7 +434,7 @@ const styles = StyleSheet.create({
   },
   navButton: {
     padding: 12,
-    backgroundColor: Colors.primaryColor,
+    backgroundColor: PRIMARY,
     borderRadius: 8,
     minWidth: 100,
     alignItems: "center",
@@ -388,7 +462,7 @@ const styles = StyleSheet.create({
     margin: 2,
   },
   activeStep: {
-    backgroundColor: Colors.primaryColor,
+    backgroundColor: PRIMARY,
   },
   modalBackground: {
     flex: 1,
@@ -414,7 +488,19 @@ const styles = StyleSheet.create({
   closeButton: {
     marginTop: 20,
     padding: 12,
-    backgroundColor: Colors.primaryColor,
+    backgroundColor: PRIMARY,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  actionRow: {
+    marginTop: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  actionBtn: {
+    flex: 1,
+    padding: 12,
     borderRadius: 10,
     alignItems: "center",
   },
