@@ -1,9 +1,10 @@
 import Colors from "@/constants/Colors";
 import { questions } from "@/constants/Data";
 import { SERVER_URI } from "@/utils/uri";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -21,6 +22,8 @@ import Toast from "react-native-toast-message";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const PRIMARY = "#013632";
 
+const INTRO_HIDE_KEY = "travelIntroHidden";
+
 const TravelInterestForm: React.FC = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -33,12 +36,36 @@ const TravelInterestForm: React.FC = () => {
   const [isPaid, setIsPaid] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
 
+  // --- Intro modal state ---
+  const [introVisible, setIntroVisible] = useState(false);
+  const [dontShowAgainIntro, setDontShowAgainIntro] = useState(false);
+
+  useEffect(() => {
+    // эхлэхэд интро харуулах эсэхийг уншина
+    (async () => {
+      try {
+        const hidden = await AsyncStorage.getItem(INTRO_HIDE_KEY);
+        if (hidden !== "1") setIntroVisible(true);
+      } catch {
+        setIntroVisible(true);
+      }
+    })();
+  }, []);
+
+  const closeIntro = async () => {
+    try {
+      if (dontShowAgainIntro) {
+        await AsyncStorage.setItem(INTRO_HIDE_KEY, "1");
+      }
+    } catch {}
+    setIntroVisible(false);
+  };
+
   // --- OPTION ДАРААД ДАРААГИЙН АСУУЛТ РУУ ШУУД ШИЛЖИНЭ ---
   const handleSelect = (option: string) => {
     const q = questions[currentQuestion];
     setAnswers((prev) => {
       const next = { ...prev, [q.id]: option };
-      // Дараагийн асуулт руу автоматаар
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion((s) => s + 1);
       }
@@ -71,6 +98,8 @@ const TravelInterestForm: React.FC = () => {
       const res = await axios.post(`${SERVER_URI}/api/bill/check`, {
         invoiceId,
       });
+      console.log(res.data);
+
       if (res.status !== 200)
         throw new Error(res.data?.error || "Төлбөр шалгахад алдаа гарлаа");
 
@@ -89,7 +118,7 @@ const TravelInterestForm: React.FC = () => {
           text2: "Төлбөр хийгдээгүй байна.",
         });
       }
-    } catch (e) {
+    } catch {
       Toast.show({
         type: "error",
         text1: "Алдаа",
@@ -104,7 +133,6 @@ const TravelInterestForm: React.FC = () => {
       const res = await axios.post(`${SERVER_URI}/api/bill/invoice`, testBill, {
         headers: { "Content-Type": "application/json" },
       });
-
       if (res.status !== 200)
         throw new Error(res.data?.error || "Invoice error");
 
@@ -151,7 +179,7 @@ const TravelInterestForm: React.FC = () => {
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       const data = await res.json();
       setChatResponse(data.reply);
-    } catch (error) {
+    } catch {
       setChatResponse("Алдаа гарлаа. Дахин оролдоно уу.");
     } finally {
       setLoading(false);
@@ -167,7 +195,6 @@ const TravelInterestForm: React.FC = () => {
       });
       return;
     }
-
     const firstLine = chatResponse.split("\n").find((l) => l.trim().length > 0);
     const title =
       (firstLine && firstLine.replace(/[#*-]/g, "").trim().slice(0, 80)) ||
@@ -300,6 +327,76 @@ const TravelInterestForm: React.FC = () => {
         )}
       </ScrollView>
 
+      {/* ===== Intro Modal (танилцуулга) ===== */}
+      <Modal
+        visible={introVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={closeIntro}
+      >
+        <View style={styles.modalBackground}>
+          <View style={[styles.modalContent, { maxWidth: 560 }]}>
+            <Text style={styles.introTitle}>
+              Таны хүсэл, сонирхолд тулгуурласан аяллын зураглал
+            </Text>
+            <Text style={styles.introText}>
+              Энэхүү богино асуулга нь таны аяллын хэв маяг, төсөв, цаг,
+              сонирхолд нийцүүлэн{" "}
+              <Text style={{ fontWeight: "800" }}>
+                зөвхөн танд зориулагдсан маршрут
+              </Text>{" "}
+              болон зөвлөмжүүдийг гаргаж өгнө.
+            </Text>
+            <View style={{ height: 10 }} />
+            <Text style={styles.introBullet}>
+              • Асуулт бүрт дармагц дараагийн асуулт руу автомат шилжинэ.
+            </Text>
+            <Text style={styles.introBullet}>
+              • Дуусмагц төлбөр баталгаажуулсаны дараа AI таны хувийн маршрутыг
+              үүсгэнэ.
+            </Text>
+            <Text style={styles.introBullet}>
+              • Маршрутаа хадгалах, хуваалцах боломжтой.
+            </Text>
+
+            {/* Checkbox row */}
+            <TouchableOpacity
+              onPress={() => setDontShowAgainIntro((v) => !v)}
+              style={styles.checkboxRow}
+              activeOpacity={0.7}
+            >
+              <View
+                style={[
+                  styles.checkboxBox,
+                  dontShowAgainIntro && styles.checkboxBoxChecked,
+                ]}
+              >
+                {dontShowAgainIntro ? (
+                  <Text style={{ color: "#fff", fontWeight: "900" }}>✓</Text>
+                ) : null}
+              </View>
+              <Text style={styles.checkboxLabel}>Дахин бүү үзүүлэх</Text>
+            </TouchableOpacity>
+
+            {/* Actions */}
+            {/* Actions — зөвхөн “Эхлэх” */}
+            <View style={[styles.actionRow, { justifyContent: "center" }]}>
+              <TouchableOpacity
+                onPress={closeIntro} // чекбокс идэвхтэй бол хадгалаад модал хаана
+                style={[
+                  styles.actionBtn,
+                  { backgroundColor: PRIMARY, maxWidth: 240 },
+                ]}
+                accessibilityLabel="Эхлэх"
+              >
+                <Text style={{ color: "#fff", fontWeight: "bold" }}>Эхлэх</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ===== Result Modal ===== */}
       <Modal
         visible={modalVisible}
         transparent
@@ -364,10 +461,7 @@ const TravelInterestForm: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    flexGrow: 1,
-  },
+  container: { padding: 20, flexGrow: 1 },
 
   stepText: {
     fontSize: 15,
@@ -395,10 +489,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
-  selectedOption: {
-    backgroundColor: "#E8F5E9",
-    borderColor: "#008000",
-  },
+  selectedOption: { backgroundColor: "#E8F5E9", borderColor: "#008000" },
 
   buttonRow: {
     flexDirection: "row",
@@ -423,13 +514,13 @@ const styles = StyleSheet.create({
 
   progressRow: {
     flexDirection: "row",
-    flexWrap: "nowrap", // ⬅️ wrap хийхгүй
+    flexWrap: "nowrap",
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
     marginTop: 18,
     marginBottom: 20,
-    paddingHorizontal: 6, // бага зэрэг зай
+    paddingHorizontal: 6,
   },
   stepCircle: {
     width: 28,
@@ -438,9 +529,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#eee",
     justifyContent: "center",
     alignItems: "center",
-    marginHorizontal: 3, // gap оронд cross-version найдвартай
+    marginHorizontal: 3,
   },
   activeStep: { backgroundColor: PRIMARY },
+
   payBtn: {
     backgroundColor: "#0984e3",
     borderRadius: 12,
@@ -448,14 +540,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 14,
     paddingHorizontal: 20,
-    alignSelf: "center", // томроод 100% дүүргэхээс сэргийлнэ
+    alignSelf: "center",
     marginTop: 16,
   },
-  payBtnText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 15,
-  },
+  payBtnText: { color: "#fff", fontWeight: "700", fontSize: 15 },
+
   modalBackground: {
     flex: 1,
     justifyContent: "center",
@@ -496,6 +585,35 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
   },
+
+  // Intro styles
+  introTitle: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: PRIMARY,
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  introText: {
+    fontSize: 15,
+    color: "#2F4F4F",
+    lineHeight: 22,
+    textAlign: "left",
+  },
+  introBullet: { fontSize: 14, color: "#41534B", marginTop: 4 },
+  checkboxRow: { flexDirection: "row", alignItems: "center", marginTop: 16 },
+  checkboxBox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1.2,
+    borderColor: "#9CA3AF",
+    marginRight: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxBoxChecked: { backgroundColor: PRIMARY, borderColor: PRIMARY },
+  checkboxLabel: { fontSize: 14, color: "#334155" },
 });
 
 export default TravelInterestForm;

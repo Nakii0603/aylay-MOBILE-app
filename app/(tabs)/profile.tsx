@@ -131,16 +131,6 @@ export default function ProfileScreen() {
             </View>
             <AntDesign name="right" size={20} color={Colors.primaryColor} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={handleAuth}>
-            <View style={styles.menuItemContent}>
-              <Image
-                source={require("@/assets/icons/profTermMenu.png")}
-                style={{ width: 30, height: 30 }}
-              />
-              <Text style={styles.menuItemText}>Нэвтрэх</Text>
-            </View>
-            <AntDesign name="right" size={20} color={Colors.primaryColor} />
-          </TouchableOpacity>
           <TouchableOpacity
             onPress={handleInfoNotScreen}
             style={styles.menuItem}
@@ -154,6 +144,16 @@ export default function ProfileScreen() {
             </View>
             <AntDesign name="right" size={20} color={Colors.primaryColor} />
           </TouchableOpacity>
+          {/* <TouchableOpacity style={styles.menuItem} onPress={handleAuth}>
+            <View style={styles.menuItemContent}>
+              <Image
+                source={require("@/assets/icons/profTermMenu.png")}
+                style={{ width: 30, height: 30 }}
+              />
+              <Text style={styles.menuItemText}>Нэвтрэх</Text>
+            </View>
+            <AntDesign name="right" size={20} color={Colors.primaryColor} />
+          </TouchableOpacity> */}
           {/* <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemContent}>
               <Ionicons name="log-out" size={26} color={Colors.red} />
