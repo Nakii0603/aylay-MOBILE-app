@@ -28,7 +28,6 @@ export default function AimagDetail() {
   const cardWidth = (screenWidth - 60) / 2;
 
   // Дэлгэрэнгүй текст харуулахад ашиглана
-
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   return (
