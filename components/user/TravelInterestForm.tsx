@@ -1,10 +1,11 @@
+// screens/TravelInterestForm.tsx
 import Colors from "@/constants/Colors";
 import { questions } from "@/constants/Data";
+import { useQPayPayment } from "@/hooks/useQPayPayment";
 import { SERVER_URI } from "@/utils/uri";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -14,6 +15,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -21,14 +23,16 @@ import Toast from "react-native-toast-message";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const PRIMARY = "#013632";
-
 const INTRO_HIDE_KEY = "travelIntroHidden";
+
+type AnswerValue = string | string[] | number;
 
 const TravelInterestForm: React.FC = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
+
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<{ [key: number]: string }>({});
+  const [answers, setAnswers] = useState<{ [key: number]: AnswerValue }>({});
   const [loading, setLoading] = useState(false);
   const [invoiceId, setInvoiceId] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -36,12 +40,11 @@ const TravelInterestForm: React.FC = () => {
   const [isPaid, setIsPaid] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
 
-  // --- Intro modal state ---
+  // Intro modal
   const [introVisible, setIntroVisible] = useState(false);
   const [dontShowAgainIntro, setDontShowAgainIntro] = useState(false);
 
   useEffect(() => {
-    // эхлэхэд интро харуулах эсэхийг уншина
     (async () => {
       try {
         const hidden = await AsyncStorage.getItem(INTRO_HIDE_KEY);
@@ -54,33 +57,123 @@ const TravelInterestForm: React.FC = () => {
 
   const closeIntro = async () => {
     try {
-      if (dontShowAgainIntro) {
-        await AsyncStorage.setItem(INTRO_HIDE_KEY, "1");
-      }
+      if (dontShowAgainIntro) await AsyncStorage.setItem(INTRO_HIDE_KEY, "1");
     } catch {}
     setIntroVisible(false);
   };
 
-  // --- OPTION ДАРААД ДАРААГИЙН АСУУЛТ РУУ ШУУД ШИЛЖИНЭ ---
-  const handleSelect = (option: string) => {
-    const q = questions[currentQuestion];
-    setAnswers((prev) => {
-      const next = { ...prev, [q.id]: option };
-      if (currentQuestion < questions.length - 1) {
-        setCurrentQuestion((s) => s + 1);
-      }
-      return next;
-    });
+  // ===== Helpers =====
+  const question = questions[currentQuestion];
+
+  const isAnswered = (qIndex: number) => {
+    const q = questions[qIndex];
+    const val = answers[q.id];
+    switch (q.type) {
+      case "single-choice":
+        return typeof val === "string" && val.length > 0;
+      case "multi-choice":
+        return Array.isArray(val) && val.length > 0;
+      case "text":
+        return typeof val === "string" && val.trim().length > 0;
+      case "number":
+        return (
+          (typeof val === "number" && !Number.isNaN(val)) ||
+          (typeof val === "string" && val.toString().trim().length > 0)
+        );
+      default:
+        return false;
+    }
   };
 
+  const allAnswered = useMemo(
+    () => questions.every((_, idx) => isAnswered(idx)),
+    [answers]
+  );
+
+  const next = () => {
+    if (currentQuestion < questions.length - 1)
+      setCurrentQuestion((s) => s + 1);
+  };
   const prev = () => {
     if (currentQuestion > 0) setCurrentQuestion((s) => s - 1);
   };
+  const goToQuestion = (index: number) => setCurrentQuestion(index);
 
-  const goToQuestion = (index: number) => {
-    setCurrentQuestion(index);
+  // ===== Answer handlers =====
+  const handleSelectSingle = (option: string) => {
+    const q = questions[currentQuestion];
+    setAnswers((prev) => ({ ...prev, [q.id]: option }));
+    // Auto-advance for single-choice
+    if (currentQuestion < questions.length - 1)
+      setCurrentQuestion((s) => s + 1);
   };
 
+  const handleToggleMulti = (option: string) => {
+    const q = questions[currentQuestion];
+    setAnswers((prev) => {
+      const prevVal = prev[q.id];
+      let nextArr: string[] = [];
+      if (Array.isArray(prevVal)) {
+        nextArr = prevVal.includes(option)
+          ? prevVal.filter((o) => o !== option)
+          : [...prevVal, option];
+      } else if (typeof prevVal === "string" && prevVal.length > 0) {
+        nextArr = prevVal === option ? [] : [prevVal, option];
+      } else {
+        nextArr = [option];
+      }
+      return { ...prev, [q.id]: nextArr };
+    });
+  };
+
+  const handleInputChange = (text: string) => {
+    const q = questions[currentQuestion];
+    if (q.type === "number") {
+      const numeric = text.replace(/[^\d]/g, "");
+      setAnswers((prev) => ({
+        ...prev,
+        [q.id]: numeric === "" ? "" : Number(numeric),
+      }));
+    } else {
+      setAnswers((prev) => ({ ...prev, [q.id]: text }));
+    }
+  };
+
+  // ===== CTA logic (under circles) =====
+  const primaryCtaLabel = allAnswered ? "Дууссан" : "Дараах";
+  const onPrimaryCta = () => {
+    if (allAnswered) {
+      handleSubmit();
+    } else if (isAnswered(currentQuestion)) {
+      next();
+    }
+  };
+
+  // ====== PAYMENT HOOK ======
+  const { status, manualCheck } = useQPayPayment(invoiceId, {
+    baseURL: SERVER_URI,
+    checkPath: "/api/bill/check",
+    intervalMs: 6000,
+  });
+
+  // AI-г нэг л удаа дуудах хамгаалалт
+  const aiRanRef = useRef(false);
+
+  useEffect(() => {
+    if (status === "PAID" && !aiRanRef.current) {
+      aiRanRef.current = true;
+      setIsPaid(true);
+      Toast.show({
+        type: "success",
+        text1: "Амжилттай",
+        text2: "Төлбөр төлөгдлөө.",
+      });
+      handleGpt();
+      setModalVisible(true);
+    }
+  }, [status]);
+
+  // ===== Billing / Chat =====
   const testBill = {
     invoice_code: "GZTEST_INVOICE",
     sender_invoice_no: "1234567",
@@ -88,47 +181,13 @@ const TravelInterestForm: React.FC = () => {
     description: "Aylay",
     sender_branch_code: "Aylay",
     amount: 10,
-    callback_url: "https://bd5492c3ee85.ngrok.io/payments?payment_id=1234567",
-  };
-
-  const checkPaymentStatus = async () => {
-    if (!invoiceId) return;
-
-    try {
-      const res = await axios.post(`${SERVER_URI}/api/bill/check`, {
-        invoiceId,
-      });
-      console.log(res.data);
-
-      if (res.status !== 200)
-        throw new Error(res.data?.error || "Төлбөр шалгахад алдаа гарлаа");
-
-      if (res.data.paid_amount > 0) {
-        setIsPaid(true);
-        Toast.show({
-          type: "success",
-          text1: "Амжилттай",
-          text2: "Төлбөр төлөгдсөн байна.",
-        });
-        await handleGpt();
-      } else {
-        Toast.show({
-          type: "error",
-          text1: "Анхаар!",
-          text2: "Төлбөр хийгдээгүй байна.",
-        });
-      }
-    } catch {
-      Toast.show({
-        type: "error",
-        text1: "Алдаа",
-        text2: "Төлбөр шалгах үед алдаа гарлаа.",
-      });
-    }
+    callback_url:
+      "https://your-server.com/payments/callback?payment_id=1234567",
   };
 
   const handleSubmit = async () => {
     setLoading(true);
+    aiRanRef.current = false; // шинэ invoice бүрт reset
     try {
       const res = await axios.post(`${SERVER_URI}/api/bill/invoice`, testBill, {
         headers: { "Content-Type": "application/json" },
@@ -139,6 +198,7 @@ const TravelInterestForm: React.FC = () => {
       const invoiceData = res.data;
       setInvoiceId(invoiceData.invoice_id);
 
+      // Банкнуудын жагсаалт руу дамжуулна
       router.push({
         pathname: "/Bank",
         params: {
@@ -159,10 +219,11 @@ const TravelInterestForm: React.FC = () => {
   };
 
   const handleGpt = async () => {
-    const message = Object.entries(answers)
-      .map(([id, ans]) => {
-        const question = questions.find((q) => q.id === Number(id));
-        return question ? `${question.question}\n→ ${ans}` : "";
+    const message = questions
+      .map((q) => {
+        const val = answers[q.id];
+        const parsed = Array.isArray(val) ? val.join(", ") : String(val ?? "");
+        return `${q.question}\n→ ${parsed}`;
       })
       .join("\n\n");
 
@@ -171,16 +232,20 @@ const TravelInterestForm: React.FC = () => {
 
     try {
       const res = await fetch(`${SERVER_URI}/api/chat/chat`, {
+        // <-- routeAfterPaid биш
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message }),
       });
 
-      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`HTTP ${res.status}: ${text}`);
+      }
       const data = await res.json();
       setChatResponse(data.reply);
-    } catch {
-      setChatResponse("Алдаа гарлаа. Дахин оролдоно уу.");
+    } catch (err: any) {
+      setChatResponse("Алдаа гарлаа: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -236,8 +301,78 @@ const TravelInterestForm: React.FC = () => {
     }
   };
 
-  const question = questions[currentQuestion];
-  const allAnswered = Object.keys(answers).length === questions.length;
+  // ===== Render only options/input (no circles/buttons here) =====
+  const renderQuestionBodyCore = () => {
+    if (question.type === "single-choice") {
+      return (
+        <View>
+          {question.options?.map((opt: string, idx: number) => {
+            const selected = answers[question.id] === opt;
+            return (
+              <TouchableOpacity
+                key={idx}
+                onPress={() => handleSelectSingle(opt)}
+                style={[styles.optionButton, selected && styles.selectedOption]}
+              >
+                <Text style={{ color: selected ? "#2e7d32" : "#333" }}>
+                  {opt}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      );
+    }
+
+    if (question.type === "multi-choice") {
+      const currentVals = Array.isArray(answers[question.id])
+        ? (answers[question.id] as string[])
+        : [];
+      return (
+        <View>
+          {question.options?.map((opt: string, idx: number) => {
+            const selected = currentVals.includes(opt);
+            return (
+              <TouchableOpacity
+                key={idx}
+                onPress={() => handleToggleMulti(opt)}
+                style={[styles.optionButton, selected && styles.selectedOption]}
+              >
+                <Text style={{ color: selected ? "#2e7d32" : "#333" }}>
+                  {opt}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      );
+    }
+
+    // text / number
+    const val = answers[question.id];
+    const display =
+      typeof val === "number"
+        ? String(val)
+        : typeof val === "string"
+        ? val
+        : "";
+    return (
+      <View style={styles.inputWrap}>
+        <TextInput
+          value={display}
+          onChangeText={handleInputChange}
+          placeholder={question.placeholder || ""}
+          placeholderTextColor="#90A4AE"
+          keyboardType={question.type === "number" ? "numeric" : "default"}
+          style={styles.textInput}
+          returnKeyType="done"
+          onSubmitEditing={() =>
+            allAnswered ? handleSubmit() : isAnswered(currentQuestion) && next()
+          }
+        />
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -247,43 +382,30 @@ const TravelInterestForm: React.FC = () => {
           Асуулт {currentQuestion + 1} / {questions.length}
         </Text>
 
-        {/* ANIMATION АШИГЛАХГҮЙ, ЕРДИЙН VIEW */}
-        <View>
-          <Text style={styles.questionText}>{question.question}</Text>
+        <Text style={styles.questionText}>{question.question}</Text>
 
-          {question.options.map((opt, idx) => (
-            <TouchableOpacity
-              key={idx}
-              onPress={() => handleSelect(opt)}
-              style={[
-                styles.optionButton,
-                answers[question.id] === opt && styles.selectedOption,
-              ]}
-            >
-              <Text
-                style={{
-                  color: answers[question.id] === opt ? "#2e7d32" : "#333",
-                }}
-              >
-                {opt}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {renderQuestionBodyCore()}
 
+        {/* Давталтын тойрог (1..n) */}
         <View style={styles.progressRow}>
-          {questions.map((_, index) => (
+          {questions.map((_: any, index: number) => (
             <TouchableOpacity
               key={index}
               onPress={() => goToQuestion(index)}
               style={[
                 styles.stepCircle,
                 currentQuestion === index && styles.activeStep,
+                isAnswered(index) && styles.completedStep,
               ]}
             >
               <Text
                 style={{
-                  color: currentQuestion === index ? "#fff" : "#333",
+                  color:
+                    currentQuestion === index
+                      ? "#fff"
+                      : isAnswered(index)
+                      ? "#0F2E23"
+                      : "#333",
                   fontWeight: "bold",
                 }}
               >
@@ -293,41 +415,41 @@ const TravelInterestForm: React.FC = () => {
           ))}
         </View>
 
-        {/* ДАРААХ товчийг устгасан. Зөвхөн Өмнөх + Дуусгах (бүгд бөглөгдвөл) */}
-        <View style={styles.buttonRow}>
+        {/* Доод нэг мөр навигац */}
+        <View style={styles.inlineRow}>
           <TouchableOpacity
             onPress={prev}
             disabled={currentQuestion === 0}
             style={[
-              styles.navButton,
+              styles.navInlineBtn,
               currentQuestion === 0 && styles.disabledButton,
             ]}
           >
             <Text style={styles.buttonText}>Өмнөх</Text>
           </TouchableOpacity>
 
-          {allAnswered && (
-            <TouchableOpacity onPress={handleSubmit} style={styles.navButton}>
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Дуусгах</Text>
-              )}
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {invoiceId && !isPaid && (
           <TouchableOpacity
-            onPress={checkPaymentStatus}
-            style={[styles.payBtn]}
+            onPress={onPrimaryCta}
+            disabled={!allAnswered && !isAnswered(currentQuestion)}
+            style={[
+              styles.navInlineBtn,
+              !allAnswered &&
+                !isAnswered(currentQuestion) &&
+                styles.disabledButton,
+            ]}
           >
-            <Text style={styles.payBtnText}>Төлбөр шалгах</Text>
+            {loading && allAnswered ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>
+                {allAnswered ? "Дууссан" : "Дараах"}
+              </Text>
+            )}
           </TouchableOpacity>
-        )}
+        </View>
       </ScrollView>
 
-      {/* ===== Intro Modal (танилцуулга) ===== */}
+      {/* ===== Intro Modal ===== */}
       <Modal
         visible={introVisible}
         transparent
@@ -349,17 +471,16 @@ const TravelInterestForm: React.FC = () => {
             </Text>
             <View style={{ height: 10 }} />
             <Text style={styles.introBullet}>
-              • Асуулт бүрт дармагц дараагийн асуулт руу автомат шилжинэ.
+              • Single-choice: дармагц дараагийн асуулт руу автоматаар шилжинэ.
             </Text>
             <Text style={styles.introBullet}>
-              • Дуусмагц төлбөр баталгаажуулсаны дараа AI таны хувийн маршрутыг
-              үүсгэнэ.
+              • Multi-choice, бичвэр/тоо: доорх “Дараах/Дууссан” товчоор
+              шилжинэ.
             </Text>
             <Text style={styles.introBullet}>
-              • Маршрутаа хадгалах, хуваалцах боломжтой.
+              • Дуусмагц төлбөр баталгаажсаны дараа AI маршрут үүсгэнэ.
             </Text>
 
-            {/* Checkbox row */}
             <TouchableOpacity
               onPress={() => setDontShowAgainIntro((v) => !v)}
               style={styles.checkboxRow}
@@ -378,11 +499,9 @@ const TravelInterestForm: React.FC = () => {
               <Text style={styles.checkboxLabel}>Дахин бүү үзүүлэх</Text>
             </TouchableOpacity>
 
-            {/* Actions */}
-            {/* Actions — зөвхөн “Эхлэх” */}
             <View style={[styles.actionRow, { justifyContent: "center" }]}>
               <TouchableOpacity
-                onPress={closeIntro} // чекбокс идэвхтэй бол хадгалаад модал хаана
+                onPress={closeIntro}
                 style={[
                   styles.actionBtn,
                   { backgroundColor: PRIMARY, maxWidth: 240 },
@@ -460,16 +579,16 @@ const TravelInterestForm: React.FC = () => {
   );
 };
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const styles = StyleSheet.create({
   container: { padding: 20, flexGrow: 1 },
-
   stepText: {
     fontSize: 15,
     marginBottom: 12,
     fontWeight: "600",
     color: "#647067",
   },
-
   questionText: {
     fontSize: 20,
     fontWeight: "800",
@@ -491,14 +610,42 @@ const styles = StyleSheet.create({
   },
   selectedOption: { backgroundColor: "#E8F5E9", borderColor: "#008000" },
 
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 24,
-    gap: 12,
+  inputWrap: {
+    borderWidth: 1,
+    borderColor: "#D9E2DD",
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    backgroundColor: "#fff",
   },
+  textInput: { fontSize: 16, paddingVertical: 10, color: "#0F2E23" },
 
-  navButton: {
+  progressRow: {
+    flexDirection: "row",
+    flexWrap: "nowrap",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    marginTop: 18,
+    marginBottom: 12,
+    paddingHorizontal: 6,
+  },
+  stepCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#eee",
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 3,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  activeStep: { backgroundColor: PRIMARY },
+  completedStep: { borderColor: PRIMARY, backgroundColor: "#E6F0EC" },
+
+  inlineRow: { flexDirection: "row", gap: 12, marginTop: 8 },
+  navInlineBtn: {
     flex: 1,
     paddingVertical: 14,
     backgroundColor: PRIMARY,
@@ -511,27 +658,6 @@ const styles = StyleSheet.create({
   },
   disabledButton: { backgroundColor: "#ccc" },
   buttonText: { color: "#fff", fontWeight: "700", fontSize: 15, padding: 2 },
-
-  progressRow: {
-    flexDirection: "row",
-    flexWrap: "nowrap",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
-    marginTop: 18,
-    marginBottom: 20,
-    paddingHorizontal: 6,
-  },
-  stepCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#eee",
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 3,
-  },
-  activeStep: { backgroundColor: PRIMARY },
 
   payBtn: {
     backgroundColor: "#0984e3",
@@ -565,7 +691,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   modalText: { fontSize: 15, color: "#2F4F4F", lineHeight: 22 },
-
   closeButton: {
     marginTop: 20,
     paddingVertical: 14,
@@ -586,7 +711,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  // Intro styles
   introTitle: {
     fontSize: 20,
     fontWeight: "900",

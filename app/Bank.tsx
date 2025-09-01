@@ -1,111 +1,214 @@
 import Colors from "@/constants/Colors";
+import { useQPayPayment } from "@/hooks/useQPayPayment";
+import { SERVER_URI } from "@/utils/uri";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  FlatList,
   Image,
   Linking,
+  Platform,
+  Pressable,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 
+type BankItem = {
+  name: string;
+  logo: string; // uri
+  link: string; // deep/universal link
+  available?: boolean;
+};
+
+const COLUMNS = 3;
+const GAP = 14;
+const SIDE = 16;
+
 const BankScreen: React.FC = () => {
   const params = useLocalSearchParams();
-  const [loading, setLoading] = useState(true);
-  const [urls, setUrls] = useState<any[]>([]);
   const router = useRouter();
+  const { width } = useWindowDimensions();
 
+  const [loading, setLoading] = useState(true);
+  const [banks, setBanks] = useState<BankItem[]>([]);
+
+  const invoiceId = (params.invoiceId as string) || "";
+
+  const { status, manualCheck } = useQPayPayment(invoiceId, {
+    baseURL: SERVER_URI,
+    checkPath: "/api/bill/check",
+    intervalMs: 60000000,
+  });
+
+  // Grid item хэмжээ
+  const itemSize = useMemo(() => {
+    const content = width - SIDE * 2 - GAP * (COLUMNS - 1);
+    return Math.floor(content / COLUMNS);
+  }, [width]);
+
+  // Банкны жагсаалт parse
   useEffect(() => {
-    if (params.urls) {
+    const init = async () => {
       try {
-        setUrls(JSON.parse(params.urls as string));
+        const raw: BankItem[] = params.urls
+          ? JSON.parse(params.urls as string)
+          : [];
+        const probed = await Promise.all(
+          raw.map(async (b) => {
+            try {
+              const can = await Linking.canOpenURL(b.link);
+              return { ...b, available: !!can };
+            } catch {
+              return { ...b, available: false };
+            }
+          })
+        );
+        probed.sort((a, b) => Number(b.available) - Number(a.available));
+        setBanks(probed);
       } catch {
         Alert.alert("Алдаа", "Банкны мэдээлэл буруу байна.");
       } finally {
         setLoading(false);
       }
-    } else {
-      setLoading(false);
-    }
+    };
+    init();
   }, [params.urls]);
 
-  const openBankApp = (link: string) => {
+  // Дэлгэц рүү буцах болгонд нэг удаа шалгана
+  useFocusEffect(
+    useCallback(() => {
+      manualCheck();
+    }, [manualCheck])
+  );
+
+  // Төлөгдвөл автоматаар буцаах
+  useEffect(() => {
+    if (status === "PAID") setTimeout(() => router.back(), 600);
+  }, [status]);
+
+  const openBankApp = (link: string, name?: string) => {
     Linking.openURL(link).catch(() =>
-      Alert.alert("Алдаа", "Апп нээх боломжгүй байна")
+      Alert.alert(
+        "Мэдэгдэл",
+        `${name || "Банкны апп"} таны төхөөрөмж дээр суулгаагүй байна.`
+      )
     );
   };
+
+  const renderItem = ({ item }: { item: BankItem }) => (
+    <Pressable
+      onPress={() => openBankApp(item.link, item.name)}
+      style={[
+        styles.gridItem,
+        {
+          width: itemSize,
+          height: itemSize,
+        },
+      ]}
+    >
+      <Image
+        source={{ uri: item.logo }}
+        style={styles.bankIcon}
+        resizeMode="contain"
+      />
+    </Pressable>
+  );
 
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#00B894" />
+        <ActivityIndicator size="large" />
         <Text style={{ marginTop: 10 }}>Банкны аппуудыг ачааллаж байна...</Text>
-      </SafeAreaView>
-    );
-  }
-
-  if (!urls || urls.length === 0) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text>Банкны апп олдсонгүй.</Text>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity onPress={router.back} style={styles.backButton}>
-        <Ionicons name="arrow-back" size={24} color={Colors.black} />
-      </TouchableOpacity>
+      {/* Back arrow */}
+      <View style={styles.header}>
+        <Pressable onPress={router.back} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={Colors.black} />
+        </Pressable>
+      </View>
 
-      <ScrollView style={styles.bankList}>
-        {urls.map((bank, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.bankItem}
-            onPress={() => openBankApp(bank.link)}
-          >
-            <Image source={{ uri: bank.logo }} style={styles.bankLogo} />
-            <View style={styles.bankTextContainer}>
-              <Text style={styles.bankName}>{bank.name}</Text>
-              <Text style={styles.bankDesc}>{bank.description}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      {/* 3x grid – зөвхөн icon */}
+      <FlatList
+        data={banks}
+        keyExtractor={(_, i) => String(i)}
+        numColumns={COLUMNS}
+        renderItem={renderItem}
+        columnWrapperStyle={{
+          gap: GAP,
+          justifyContent: "center",
+        }}
+        contentContainerStyle={{
+          paddingHorizontal: SIDE,
+          paddingTop: 12,
+          paddingBottom: 100,
+          rowGap: GAP,
+        }}
+        showsVerticalScrollIndicator={false}
+      />
+
+      {/* Fixed доод button */}
+      {status !== "PAID" && (
+        <View style={styles.fixedBottom}>
+          <Pressable onPress={manualCheck} style={styles.fixedBtn}>
+            <Text style={styles.fixedBtnText}>Төлбөр шалгах</Text>
+          </Pressable>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, paddingTop: 10, marginTop: 30 },
-  backButton: {
-    position: "absolute",
-    top: 10,
-    left: 10,
-    padding: 8,
-    borderRadius: 20,
-    zIndex: 10,
-  },
-  bankList: { width: "100%", marginTop: 30 },
-  bankItem: {
+  container: { flex: 1 },
+  header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderBottomColor: "#ddd",
-    borderBottomWidth: 1,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 6,
   },
-  bankLogo: { width: 40, height: 40, resizeMode: "contain", marginRight: 15 },
-  bankTextContainer: { flex: 1 },
-  bankName: { fontWeight: "bold", fontSize: 16 },
-  bankDesc: { color: "#666" },
+  backButton: { padding: 6, borderRadius: 20 },
+  gridItem: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 4 },
+      },
+      android: { elevation: 2 },
+    }),
+  },
+  bankIcon: { width: "65%", height: "65%", borderRadius: 12 },
+  fixedBottom: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    right: 20,
+  },
+  fixedBtn: {
+    backgroundColor: "#0ea5e9",
+    borderRadius: 16,
+    paddingVertical: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  fixedBtnText: { color: "#fff", fontSize: 18, fontWeight: "700" },
 });
 
 export default BankScreen;
