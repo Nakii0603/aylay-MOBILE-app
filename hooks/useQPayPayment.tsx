@@ -30,7 +30,6 @@ export function useQPayPayment(invoiceId?: string | null, opts?: Options) {
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // RN орчинд setInterval → number
   const pollRef = useRef<number | null>(null);
 
   const clearPoll = useCallback(() => {
