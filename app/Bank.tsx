@@ -21,7 +21,7 @@ import {
 
 type BankItem = {
   name: string;
-  logo: string; // uri
+  logo: string;
   link: string; // deep/universal link
   available?: boolean;
 };
