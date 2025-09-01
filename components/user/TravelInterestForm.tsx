@@ -21,6 +21,8 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const PRIMARY = "#013632";
 const INTRO_HIDE_KEY = "travelIntroHidden";
@@ -30,7 +32,6 @@ type AnswerValue = string | string[] | number;
 const TravelInterestForm: React.FC = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
-
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<{ [key: number]: AnswerValue }>({});
   const [loading, setLoading] = useState(false);
@@ -578,8 +579,6 @@ const TravelInterestForm: React.FC = () => {
     </SafeAreaView>
   );
 };
-
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const styles = StyleSheet.create({
   container: { padding: 20, flexGrow: 1 },
